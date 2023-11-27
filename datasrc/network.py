@@ -513,10 +513,6 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
-    
-	NetMessage("Sv_TickRate", [
-		NetIntAny("m_TickRate"),
-	]),
 
 	NetMessage("Unused2", []),
 
@@ -561,5 +557,9 @@ Messages = [
 
 	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
 		NetIntRange("m_Voted", -1, 1),
+	]),
+    
+	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
+		NetIntRange("m_TickRate", 1, 1000),
 	]),
 ]
