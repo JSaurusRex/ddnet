@@ -89,6 +89,7 @@ protected:
 	float m_FrameTimeAvg = 0.0001f;
 
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc = nullptr;
+	int m_GameTickSpeed;
 
 	char m_aNews[3000] = "";
 	int m_Points = -1;
@@ -138,7 +139,8 @@ public:
 	inline float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
 	inline float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
 	inline float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
-	inline int GameTickSpeed() const { return SERVER_TICK_SPEED; }
+	inline int GameTickSpeed() const { return m_GameTickSpeed; }
+	inline void SetGameTickSpeed(int tickspeed) { m_GameTickSpeed = tickspeed; }
 
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
