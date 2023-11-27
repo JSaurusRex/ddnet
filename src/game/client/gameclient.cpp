@@ -848,8 +848,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		Client()->EnterGame(Conn);
 		Client()->SetGameTickSpeed(50);
 		m_GameWorld.m_GameTickSpeed = 50;
+		m_GameWorld.m_Core.m_GameTickSpeed = 50;
 		m_PredictedWorld.m_GameTick = 50;
+		m_PredictedWorld.m_Core.m_GameTickSpeed = 50;
 		m_PrevPredictedWorld.m_GameTick = 50;
+		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = 50;
 	}
 	else if(MsgId == NETMSGTYPE_SV_EMOTICON)
 	{
@@ -907,8 +910,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_TickRate *pMsg = (CNetMsg_Sv_TickRate *)pRawMsg;
 		Client()->SetGameTickSpeed(pMsg->m_TickRate);
 		m_GameWorld.m_GameTickSpeed = pMsg->m_TickRate;
+		m_GameWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
 		m_PredictedWorld.m_GameTick = pMsg->m_TickRate;
+		m_PredictedWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
 		m_PrevPredictedWorld.m_GameTick = pMsg->m_TickRate;
+		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
 	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{
@@ -1315,6 +1321,7 @@ void CGameClient::OnNewSnapshot()
 {
 	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
+		TempWorld.m_GameTickSpeed = Client()->GameTickSpeed();
 		CCharacterCore TempCore = CCharacterCore();
 		CTeamsCore TempTeams = CTeamsCore();
 		TempCore.Init(&TempWorld, Collision(), &TempTeams);
@@ -2743,6 +2750,7 @@ void CGameClient::DetectStrongHook()
 
 		CWorldCore World;
 		World.m_aTuning[g_Config.m_ClDummy] = m_aTuning[g_Config.m_ClDummy];
+		World.m_GameTickSpeed = Client()->GameTickSpeed();
 
 		for(int dir = 0; dir < 2; dir++)
 		{
