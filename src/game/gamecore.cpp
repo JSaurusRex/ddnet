@@ -438,8 +438,8 @@ void CCharacterCore::TickDeferred()
 					if(length(m_Vel) > 0.0001f)
 						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
-					m_Vel += Dir * a * (Velocity * 0.75f);
-					m_Vel *= 0.85f;
+					m_Vel += Dir * a * (Velocity * 0.75f) / (SERVER_TICK_SPEED/50.0);
+					m_Vel *= pow(0.85f, 1/(SERVER_TICK_SPEED/50.0));
 				}
 
 				// handle hook influence

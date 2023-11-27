@@ -513,6 +513,10 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
+    
+	NetMessage("Sv_TickRate", [
+		NetIntAny("m_TickRate"),
+	]),
 
 	NetMessage("Unused2", []),
 

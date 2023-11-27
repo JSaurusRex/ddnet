@@ -1452,6 +1452,10 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		if(OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
+	}else if(SERVER_TICK_SPEED != 50)
+	{
+		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
+		return; // client doesn't support non 50hz servers
 	}
 
 	if(!Server()->ClientPrevIngame(ClientID))
@@ -1696,6 +1700,17 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	{
 		Server()->Kick(ClientID, "unsupported client");
 		return true;
+	}
+
+	if(ClientVersion < VERSION_DDNET_TICKSPEED && SERVER_TICK_SPEED != 50)
+	{
+		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
+		return true;
+	}
+
+	if(SERVER_TICK_SPEED != 50)
+	{
+		SendTickRate(ClientID);
 	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientID];
@@ -4140,6 +4155,13 @@ void CGameContext::SendRecord(int ClientID)
 	{
 		Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 	}
+}
+
+void CGameContext::SendTickRate(int ClientID)
+{
+	CNetMsg_Sv_TickRate Msg;
+	Msg.m_TickRate = SERVER_TICK_SPEED;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay)
