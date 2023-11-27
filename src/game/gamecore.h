@@ -196,6 +196,7 @@ public:
 	{
 		mem_zero(m_apCharacters, sizeof(m_apCharacters));
 		m_pPrng = nullptr;
+		m_GameTickSpeed = SERVER_TICK_SPEED;
 	}
 
 	int RandomOr0(int BelowThis)
@@ -213,6 +214,7 @@ public:
 	CTuningParams m_aTuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
+	int m_GameTickSpeed;
 
 	void InitSwitchers(int HighestSwitchNumber);
 	std::vector<SSwitchers> m_vSwitchers;
@@ -233,6 +235,7 @@ public:
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
+	int m_TickSpeed;
 	int m_HookTick;
 	int m_HookState;
 	std::set<int> m_AttachedPlayers;

@@ -80,6 +80,7 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 
 	// fail safe, if core's tuning didn't get updated at all, just fallback to world tuning.
 	m_Tuning = m_pWorld->m_aTuning[g_Config.m_ClDummy];
+	m_TickSpeed = pWorld->m_GameTickSpeed;
 }
 
 void CCharacterCore::SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
@@ -211,7 +212,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
-				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
+				m_HookTick = (float)m_TickSpeed * (1.25f - m_Tuning.m_HookDuration);
 				m_TriggeredEvents |= COREEVENT_HOOK_LAUNCH;
 			}
 		}
@@ -389,7 +390,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 		// release hook (max default hook time is 1.25 s)
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED + SERVER_TICK_SPEED / 5 || (m_pWorld && !m_pWorld->m_apCharacters[m_HookedPlayer])))
+		if(m_HookedPlayer != -1 && (m_HookTick > m_TickSpeed + m_TickSpeed / 5 || (m_pWorld && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
 			SetHookedPlayer(-1);
 			m_HookState = HOOK_RETRACTED;
@@ -438,8 +439,8 @@ void CCharacterCore::TickDeferred()
 					if(length(m_Vel) > 0.0001f)
 						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
-					m_Vel += Dir * a * (Velocity * 0.75f) / (SERVER_TICK_SPEED/50.0);
-					m_Vel *= pow(0.85f, 1/(SERVER_TICK_SPEED/50.0));
+					m_Vel += Dir * a * (Velocity * 0.75f) / (m_TickSpeed/50.0);
+					m_Vel *= pow(0.85f, 1/(m_TickSpeed/50.0));
 				}
 
 				// handle hook influence
