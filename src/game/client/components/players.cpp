@@ -395,7 +395,7 @@ void CPlayers::RenderPlayer(
 		AttackTime = (Client()->PredIntraGameTick(g_Config.m_ClDummy) + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)Client()->GameTickSpeed();
 		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)Client()->GameTickSpeed();
 	}
-	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
+	float AttackTicksPassed = AttackTime * 50;
 
 	float Angle;
 	if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
