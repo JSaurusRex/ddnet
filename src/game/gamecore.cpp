@@ -508,6 +508,54 @@ void CCharacterCore::Move()
 	else
 		m_LeftWall = true;
 
+	if(m_pWorld->m_GameTickSpeed > 50)	//stops players from going into walls, ceilings, etc.
+	{
+		bool top = false, down = false, left = false, right = false;
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y+32), vec2(28.0f, 28.0f)))
+			down = true;
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y-32), vec2(28.0f, 28.0f)))
+			top = true;
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y), vec2(28.0f, 28.0f)))
+			right = true;
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y), vec2(28.0f, 28.0f)))
+			left = true;
+
+		if(down || top)
+			NewPos.y = round_to_int(NewPos.y);
+
+		if(left || right)
+			NewPos.x = round_to_int(NewPos.x);
+
+		//corner cases
+		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y+32), vec2(28.0f, 28.0f)) && !down && !right)
+		{
+			NewPos.x = round_to_int(NewPos.x);
+			NewPos.y = round_to_int(NewPos.y);
+		}
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y+32), vec2(28.0f, 28.0f)) && !down && !left)
+		{
+			NewPos.x = round_to_int(NewPos.x);
+			NewPos.y = round_to_int(NewPos.y);
+		}
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y-32), vec2(28.0f, 28.0f)) && !top && !left)
+		{
+			NewPos.x = round_to_int(NewPos.x);
+			NewPos.y = round_to_int(NewPos.y);
+		}
+
+		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y-32), vec2(28.0f, 28.0f)) && !top && !right)
+		{
+			NewPos.x = round_to_int(NewPos.x);
+			NewPos.y = round_to_int(NewPos.y);
+		}
+	}
+
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
 	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
@@ -547,10 +595,10 @@ void CCharacterCore::Move()
 	m_Pos = NewPos;
 }
 
-void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int tickspeed)
 {
-	pObjCore->m_X = round_to_int(m_Pos.x);
-	pObjCore->m_Y = round_to_int(m_Pos.y);
+	pObjCore->m_X = round_to_int(m_Pos.x * (tickspeed > 50 ? 4 : 1));
+	pObjCore->m_Y = round_to_int(m_Pos.y * (tickspeed > 50 ? 4 : 1));
 
 	pObjCore->m_VelX = round_to_int(m_Vel.x * 256.0f);
 	pObjCore->m_VelY = round_to_int(m_Vel.y * 256.0f);
@@ -566,10 +614,10 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore, int tickspeed)
 {
-	m_Pos.x = pObjCore->m_X;
-	m_Pos.y = pObjCore->m_Y;
+	m_Pos.x = pObjCore->m_X / (tickspeed > 50 ? 4.0 : 1);
+	m_Pos.y = pObjCore->m_Y / (tickspeed > 50 ? 4.0 : 1);
 	m_Vel.x = pObjCore->m_VelX / 256.0f;
 	m_Vel.y = pObjCore->m_VelY / 256.0f;
 	m_HookState = pObjCore->m_HookState;
@@ -642,8 +690,8 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
-	Write(&Core);
-	Read(&Core);
+	Write(&Core, m_pWorld->m_GameTickSpeed);
+	Read(&Core, m_pWorld->m_GameTickSpeed);
 }
 
 void CCharacterCore::SetHookedPlayer(int HookedPlayer)

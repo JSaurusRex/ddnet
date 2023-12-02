@@ -1203,7 +1203,7 @@ void CGameContext::OnTick()
 			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
 			{
 				CNetObj_CharacterCore Char;
-				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char, SERVER_TICK_SPEED);
 				m_TeeHistorian.RecordPlayer(i, &Char);
 			}
 			else
