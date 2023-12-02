@@ -282,8 +282,8 @@ public:
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
-	void Write(CNetObj_CharacterCore *pObjCore) const;
+	void Read(const CNetObj_CharacterCore *pObjCore, int tickspeed);
+	void Write(CNetObj_CharacterCore *pObjCore, int tickspeed) const;
 	void Quantize();
 
 	// DDRace
