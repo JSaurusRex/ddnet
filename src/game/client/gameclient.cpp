@@ -846,10 +846,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	if(MsgId == NETMSGTYPE_SV_READYTOENTER)
 	{
 		Client()->EnterGame(Conn);
-		Client()->SetGameTickSpeed(50);
-		m_GameWorld.m_Core.m_GameTickSpeed = 50;
-		m_PredictedWorld.m_Core.m_GameTickSpeed = 50;
-		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = 50;
+		Client()->SetGameTickSpeed(SERVER_TICK_SPEED);
+		m_GameWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
+		m_PredictedWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
+		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
 	}
 	else if(MsgId == NETMSGTYPE_SV_EMOTICON)
 	{
