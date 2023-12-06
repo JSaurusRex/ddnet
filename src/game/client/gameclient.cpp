@@ -850,10 +850,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	if(MsgId == NETMSGTYPE_SV_READYTOENTER)
 	{
 		Client()->EnterGame(Conn);
-		Client()->SetGameTickSpeed(SERVER_TICK_SPEED);
-		m_GameWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
-		m_PredictedWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
-		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = SERVER_TICK_SPEED;
+		SetGameTickSpeed(SERVER_TICK_SPEED);
 	}
 	else if(MsgId == NETMSGTYPE_SV_EMOTICON)
 	{
@@ -909,10 +906,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	else if(MsgId == NETMSGTYPE_SV_TICKRATE)
 	{
 		CNetMsg_Sv_TickRate *pMsg = (CNetMsg_Sv_TickRate *)pRawMsg;
-		Client()->SetGameTickSpeed(pMsg->m_TickRate);
-		m_GameWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
-		m_PredictedWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
-		m_PrevPredictedWorld.m_Core.m_GameTickSpeed = pMsg->m_TickRate;
+		SetGameTickSpeed(pMsg->m_TickRate);
 	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{
@@ -3518,6 +3512,14 @@ bool CGameClient::CanDisplayWarning() const
 bool CGameClient::IsDisplayingWarning() const
 {
 	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
+}
+
+void CGameClient::SetGameTickSpeed(int Tickspeed)
+{
+	Client()->SetGameTickSpeed(Tickspeed);
+	m_GameWorld.m_Core.m_GameTickSpeed = Tickspeed;
+	m_PredictedWorld.m_Core.m_GameTickSpeed = Tickspeed;
+	m_PrevPredictedWorld.m_Core.m_GameTickSpeed = Tickspeed;
 }
 
 CNetObjHandler *CGameClient::GetNetObjHandler()
