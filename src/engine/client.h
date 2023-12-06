@@ -341,6 +341,7 @@ public:
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() = 0;
 	virtual bool IsDisplayingWarning() = 0;
+	virtual void SetGameTickSpeed(int Tickspeed) = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };
