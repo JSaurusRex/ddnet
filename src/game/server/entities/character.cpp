@@ -874,8 +874,8 @@ void CCharacter::TickDeferred()
 		CNetObj_Character Current;
 		mem_zero(&Predicted, sizeof(Predicted));
 		mem_zero(&Current, sizeof(Current));
-		m_ReckoningCore.Write(&Predicted, SERVER_TICK_SPEED);
-		m_Core.Write(&Current, SERVER_TICK_SPEED);
+		m_ReckoningCore.Write(&Predicted, Server()->TickSpeed());
+		m_Core.Write(&Current, Server()->TickSpeed());
 
 		// only allow dead reackoning for a top of 3 seconds
 		if(m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
@@ -1072,7 +1072,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		if(!pCharacter)
 			return;
 
-		pCore->Write(pCharacter, SERVER_TICK_SPEED);
+		pCore->Write(pCharacter, Server()->TickSpeed());
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
@@ -1097,7 +1097,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		if(!pCharacter)
 			return;
 
-		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)), SERVER_TICK_SPEED);
+		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)), Server()->TickSpeed());
 		if(pCharacter->m_Angle > (int)(pi * 256.0f))
 		{
 			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);

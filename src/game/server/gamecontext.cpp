@@ -110,6 +110,9 @@ void CGameContext::Construct(int Resetting)
 
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
+
+	if(Server())
+		m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
 }
 
 void CGameContext::Destruct(int Resetting)
@@ -1259,7 +1262,7 @@ void CGameContext::OnTick()
 			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
 			{
 				CNetObj_CharacterCore Char;
-				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char, SERVER_TICK_SPEED);
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char, Server()->TickSpeed());
 				m_TeeHistorian.RecordPlayer(i, &Char);
 			}
 			else
@@ -1520,7 +1523,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		if(OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
-	}else if(SERVER_TICK_SPEED != 50)
+	}else if(Server()->TickSpeed() != 50)
 	{
 		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
 		return; // client doesn't support non 50hz servers
@@ -1770,13 +1773,13 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		return true;
 	}
 
-	if(ClientVersion < VERSION_DDNET_TICKSPEED && SERVER_TICK_SPEED != 50)
+	if(ClientVersion < VERSION_DDNET_TICKSPEED && Server()->TickSpeed() != 50)
 	{
 		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
 		return true;
 	}
 
-	if(SERVER_TICK_SPEED != 50)
+	if(Server()->TickSpeed() != 50)
 	{
 		SendTickRate(ClientID);
 	}
@@ -3579,6 +3582,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_Collision.Init(&m_Layers);
 	m_World.m_pTuningList = m_aTuningList;
 	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
+	m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -4225,7 +4229,7 @@ void CGameContext::SendRecord(int ClientID)
 void CGameContext::SendTickRate(int ClientID)
 {
 	CNetMsg_Sv_TickRate Msg;
-	Msg.m_TickRate = SERVER_TICK_SPEED;
+	Msg.m_TickRate = Server()->TickSpeed();
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
