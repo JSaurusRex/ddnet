@@ -198,10 +198,8 @@ void CPlayers::RenderHookCollLine(
 
 			do
 			{
-				CCharacterCore tmpCore;
-				tmpCore.m_TickSpeed = Client()->GameTickSpeed();
 				OldPos = NewPos;
-				NewPos = OldPos + ExDirection * tmpCore.ScaleValue(CCharacterCore::TUNING_SCALE_LINEAR, m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookFireSpeed);
+				NewPos = OldPos + ExDirection * m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookFireSpeed;
 
 				if(distance(InitPos, NewPos) > m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength)
 				{
