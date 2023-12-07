@@ -602,6 +602,11 @@ int64_t CServer::TickStartTime(int Tick)
 	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
+int CServer::TickSpeed() 
+{
+	return m_pConfig->m_SvTickRate;
+}
+
 int CServer::Init()
 {
 	for(auto &Client : m_aClients)
@@ -3480,7 +3485,9 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aDate);
 	}
-	pServer->m_aDemoRecorder[MAX_CLIENTS].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_aCurrentMapSha256[MAP_TYPE_SIX], pServer->m_aCurrentMapCrc[MAP_TYPE_SIX], "server", pServer->m_aCurrentMapSize[MAP_TYPE_SIX], pServer->m_apCurrentMapData[MAP_TYPE_SIX], SERVER_TICK_SPEED);
+	pServer->m_aDemoRecorder[MAX_CLIENTS].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(),
+		pServer->m_aCurrentMap, pServer->m_aCurrentMapSha256[MAP_TYPE_SIX], pServer->m_aCurrentMapCrc[MAP_TYPE_SIX], "server",
+		pServer->m_aCurrentMapSize[MAP_TYPE_SIX], pServer->m_apCurrentMapData[MAP_TYPE_SIX], pServer->Config()->m_SvTickRate);
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)

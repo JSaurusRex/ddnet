@@ -55,7 +55,7 @@ public:
 	char *GetCurrentFilename() override { return m_aCurrentFilename; }
 	void ClearCurrentFilename() { m_aCurrentFilename[0] = '\0'; }
 
-	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
+	int Length() const override { return (m_LastTickMarker - m_FirstTick) / m_TickRate; }
 };
 
 class CDemoPlayer : public IDemoPlayer
