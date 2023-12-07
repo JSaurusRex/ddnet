@@ -87,6 +87,8 @@ void CCharacter::HandleJetpack()
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 			if(!m_TuneZone)
 				Strength = m_LastJetpackStrength;
+			
+			Strength = m_Core.ScaleValue(CCharacterCore::TUNING_SCALE_ACCEL, Strength);
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -324,6 +326,8 @@ void CCharacter::FireWeapon()
 				Dir = vec2(0.f, -1.f);
 
 			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
+
+			Strength = pTarget->Core()->ScaleValue(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
