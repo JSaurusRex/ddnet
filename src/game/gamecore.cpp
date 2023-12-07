@@ -542,16 +542,16 @@ void CCharacterCore::Move()
 	{
 		bool top = false, down = false, left = false, right = false;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y+32), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y+16), vec2(28.0f, 28.0f)))
 			down = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y-32), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y-16), vec2(28.0f, 28.0f)))
 			top = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y), vec2(28.0f, 28.0f)))
 			right = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y), vec2(28.0f, 28.0f)))
 			left = true;
 
 		if(down || top)
@@ -561,25 +561,25 @@ void CCharacterCore::Move()
 			NewPos.x = round_to_int(NewPos.x);
 
 		//corner cases
-		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y+32), vec2(28.0f, 28.0f)) && !down && !right)
+		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y+16), vec2(28.0f, 28.0f)) && !down && !right)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y+32), vec2(28.0f, 28.0f)) && !down && !left)
+		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y+16), vec2(28.0f, 28.0f)) && !down && !left)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-32, m_Pos.y-32), vec2(28.0f, 28.0f)) && !top && !left)
+		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y-16), vec2(28.0f, 28.0f)) && !top && !left)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x+32, m_Pos.y-32), vec2(28.0f, 28.0f)) && !top && !right)
+		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y-16), vec2(28.0f, 28.0f)) && !top && !right)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
