@@ -382,7 +382,7 @@ void CGhost::OnRender()
 		}
 
 		//convert positions
-		if(Ghost.m_Tickrate <= SERVER_TICK_SPEED && Client()->GameTickSpeed() > SERVER_TICK_SPEED)
+		if(Ghost.m_Tickrate <= 50 && Client()->GameTickSpeed() > 50)
 		{
 			Prev.m_X *= 4;
 			Prev.m_Y *= 4;
@@ -391,7 +391,7 @@ void CGhost::OnRender()
 			Player.m_Y *= 4;
 		}
 
-		if(Ghost.m_Tickrate > SERVER_TICK_SPEED && Client()->GameTickSpeed() <= SERVER_TICK_SPEED)
+		if(Ghost.m_Tickrate > 50 && Client()->GameTickSpeed() <= 50)
 		{
 			Prev.m_X /= 4;
 			Prev.m_Y /= 4;
@@ -592,7 +592,7 @@ int CGhost::Load(const char *pFilename)
 		pGhost->m_StartTick = pGhost->m_Path.Get(0)->m_Tick;
 
 	if(pGhost->m_Tickrate <= 0)
-		pGhost->m_Tickrate = SERVER_TICK_SPEED;
+		pGhost->m_Tickrate = 50;
 
 	if(!FoundSkin)
 		GetGhostSkin(&pGhost->m_Skin, "default", 0, 0, 0);
