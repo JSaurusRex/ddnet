@@ -303,7 +303,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		Strength = pChr->Core()->ScaleValue(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
 
 		float Dmg = Strength * l;
-		if(!(int)Dmg)
+		if(!(int)(Dmg*pChr->Core()->m_TickSpeed/50.0f))
 			continue;
 
 		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCID())
