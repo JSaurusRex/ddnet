@@ -257,7 +257,8 @@ public:
 		int m_OldVelAmount;
 	} m_Ninja;
 
-	enum{
+	enum
+	{
 		TUNING_SCALE_NOTHING,
 		TUNING_SCALE_LINEAR,
 		TUNING_SCALE_ACCEL,

@@ -2095,7 +2095,7 @@ void CGameClient::OnPredict()
 				CCharacterCore previous, current;
 				previous.Read(&m_Snap.m_aCharacters[i].m_Prev, Client()->GameTickSpeed());
 				current.Read(&m_Snap.m_aCharacters[i].m_Cur, Client()->GameTickSpeed());
-				vec2 CurPos = mix( previous.m_Pos, current.m_Pos, Client()->IntraGameTick(g_Config.m_ClDummy));
+				vec2 CurPos = mix(previous.m_Pos, current.m_Pos, Client()->IntraGameTick(g_Config.m_ClDummy));
 				vec2 RenderDiff = PredPos - aBeforeRender[i];
 				vec2 PredDiff = PredPos - CurPos;
 

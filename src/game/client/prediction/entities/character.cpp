@@ -87,7 +87,7 @@ void CCharacter::HandleJetpack()
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 			if(!m_TuneZone)
 				Strength = m_LastJetpackStrength;
-			
+
 			Strength = m_Core.ScaleValue(CCharacterCore::TUNING_SCALE_ACCEL, Strength);
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 		}

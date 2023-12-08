@@ -299,11 +299,11 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			Strength = Tuning()->m_ExplosionStrength;
 		else
 			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
-		
+
 		Strength = pChr->Core()->ScaleValue(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
 
 		float Dmg = Strength * l;
-		if(!(int)(Dmg*pChr->Core()->m_TickSpeed/50.0f))
+		if(!(int)(Dmg * pChr->Core()->m_TickSpeed / 50.0f))
 			continue;
 
 		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCID())
@@ -1457,7 +1457,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		if(OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
-	}else if(Server()->TickSpeed() != 50)
+	}
+	else if(Server()->TickSpeed() != 50)
 	{
 		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
 		return; // client doesn't support non 50hz servers

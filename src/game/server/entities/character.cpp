@@ -209,7 +209,7 @@ void CCharacter::HandleJetpack()
 				Strength = Tuning()->m_JetpackStrength;
 			else
 				Strength = TuningList()[m_TuneZone].m_JetpackStrength;
-			
+
 			Strength = m_Core.ScaleValue(CCharacterCore::TUNING_SCALE_ACCEL, Strength);
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 		}
