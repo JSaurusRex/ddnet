@@ -28,7 +28,7 @@ static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_CustomTickrateVersion = 7;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
-static const int gs_NumMarkersOffset = 176+sizeof(int);
+static const int gs_NumMarkersOffset = 176 + sizeof(int);
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
@@ -470,7 +470,7 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 			NewTick = bytes_be_to_uint(aTickdata);
 		}
 		if(NewTick < MIN_TICK || NewTick >= MAX_TICK) // invalid tick
-				return CHUNKHEADER_ERROR;
+			return CHUNKHEADER_ERROR;
 		*pTick = NewTick;
 	}
 	else

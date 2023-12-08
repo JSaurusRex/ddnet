@@ -134,26 +134,25 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
-
 float CCharacterCore::ScaleValue(int Scaling, float value)
 {
 	if(m_TickSpeed == 50)
 		return value;
-	
-	float speed = m_TickSpeed/50.0;
+
+	float speed = m_TickSpeed / 50.0;
 
 	switch(Scaling)
 	{
-		case TUNING_SCALE_NOTHING:
-			return value;
-		case TUNING_SCALE_LINEAR:
-			return value/speed;
-		case TUNING_SCALE_ACCEL:
-			return value/pow(speed, 2);
-		case TUNING_SCALE_FRICTION:
-			return pow(value, 1/speed);
+	case TUNING_SCALE_NOTHING:
+		return value;
+	case TUNING_SCALE_LINEAR:
+		return value / speed;
+	case TUNING_SCALE_ACCEL:
+		return value / pow(speed, 2);
+	case TUNING_SCALE_FRICTION:
+		return pow(value, 1 / speed);
 	}
-	
+
 	return value;
 }
 
@@ -285,7 +284,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	}
 	else if(m_HookState == HOOK_FLYING)
 	{
-		vec2 NewPos = m_HookPos + m_HookDir * ScaleValue(TUNING_SCALE_LINEAR ,m_Tuning.m_HookFireSpeed);
+		vec2 NewPos = m_HookPos + m_HookDir * ScaleValue(TUNING_SCALE_LINEAR, m_Tuning.m_HookFireSpeed);
 		if((!m_NewHook && distance(m_Pos, NewPos) > m_Tuning.m_HookLength) || (m_NewHook && distance(m_HookTeleBase, NewPos) > m_Tuning.m_HookLength))
 		{
 			m_HookState = HOOK_RETRACT_START;
@@ -466,8 +465,8 @@ void CCharacterCore::TickDeferred()
 					if(length(m_Vel) > 0.0001f)
 						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
-					m_Vel += Dir * a * (Velocity * 0.75f) / (m_TickSpeed/50.0);
-					m_Vel *= pow(0.85f, 1/(m_TickSpeed/50.0));
+					m_Vel += Dir * a * (Velocity * 0.75f) / (m_TickSpeed / 50.0);
+					m_Vel *= pow(0.85f, 1 / (m_TickSpeed / 50.0));
 				}
 
 				// handle hook influence
@@ -539,23 +538,23 @@ void CCharacterCore::Move()
 		m_LeftWall = true;
 
 	vec2 tmpPos = NewPos;
-	tmpPos.x = round_to_int(tmpPos.x*4)/4.0;
-	tmpPos.y = round_to_int(tmpPos.y*4)/4.0;
+	tmpPos.x = round_to_int(tmpPos.x * 4) / 4.0;
+	tmpPos.y = round_to_int(tmpPos.y * 4) / 4.0;
 
-	if(m_pWorld->m_GameTickSpeed > 50 && m_pCollision->TestBox(tmpPos, PhysicalSizeVec2()))	//stops players from going into walls, ceilings, etc.
+	if(m_pWorld->m_GameTickSpeed > 50 && m_pCollision->TestBox(tmpPos, PhysicalSizeVec2())) //stops players from going into walls, ceilings, etc.
 	{
 		bool top = false, down = false, left = false, right = false;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y+16), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y + 16), vec2(28.0f, 28.0f)))
 			down = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y-16), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x, m_Pos.y - 16), vec2(28.0f, 28.0f)))
 			top = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x + 16, m_Pos.y), vec2(28.0f, 28.0f)))
 			right = true;
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y), vec2(28.0f, 28.0f)))
+		if(m_pCollision->TestBox(vec2(m_Pos.x - 16, m_Pos.y), vec2(28.0f, 28.0f)))
 			left = true;
 
 		if(down || top)
@@ -571,25 +570,25 @@ void CCharacterCore::Move()
 		}
 
 		//corner cases
-		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y+16), vec2(28.0f, 28.0f)) && !down && !right)
+		if(m_pCollision->TestBox(vec2(m_Pos.x + 16, m_Pos.y + 16), vec2(28.0f, 28.0f)) && !down && !right)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y+16), vec2(28.0f, 28.0f)) && !down && !left)
+		if(m_pCollision->TestBox(vec2(m_Pos.x - 16, m_Pos.y + 16), vec2(28.0f, 28.0f)) && !down && !left)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x-16, m_Pos.y-16), vec2(28.0f, 28.0f)) && !top && !left)
+		if(m_pCollision->TestBox(vec2(m_Pos.x - 16, m_Pos.y - 16), vec2(28.0f, 28.0f)) && !top && !left)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);
 		}
 
-		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y-16), vec2(28.0f, 28.0f)) && !top && !right)
+		if(m_pCollision->TestBox(vec2(m_Pos.x + 16, m_Pos.y - 16), vec2(28.0f, 28.0f)) && !top && !right)
 		{
 			NewPos.x = round_to_int(NewPos.x);
 			NewPos.y = round_to_int(NewPos.y);

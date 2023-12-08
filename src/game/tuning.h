@@ -8,7 +8,7 @@ MACRO_TUNING_PARAM(GroundControlSpeed, ground_control_speed, 10.0f, "Max speed t
 MACRO_TUNING_PARAM(GroundControlAccel, ground_control_accel, 100.0f / 50, "Acceleration speed on the ground")
 MACRO_TUNING_PARAM(GroundFriction, ground_friction, 0.5f, "Friction on the ground")
 MACRO_TUNING_PARAM(GroundJumpImpulse, ground_jump_impulse, 13.2f, "Impulse when jumping on ground")
-MACRO_TUNING_PARAM(AirJumpImpulse, air_jump_impulse, 12.0f , "Impulse when jumping in air")
+MACRO_TUNING_PARAM(AirJumpImpulse, air_jump_impulse, 12.0f, "Impulse when jumping in air")
 MACRO_TUNING_PARAM(AirControlSpeed, air_control_speed, 250.0f / 50, "Max speed the tee can get in the air")
 MACRO_TUNING_PARAM(AirControlAccel, air_control_accel, 1.5f, "Acceleration speed in air")
 MACRO_TUNING_PARAM(AirFriction, air_friction, 0.95f, "Friction in the air")

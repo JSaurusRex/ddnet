@@ -322,11 +322,11 @@ void CGhost::OnRender()
 	{
 		if(Ghost.Empty())
 			continue;
-		
+
 		float speedDiff = Client()->GameTickSpeed() / (float)Ghost.m_Tickrate;
 
 		int GhostTick = Ghost.m_StartTick + floor(PlaybackTick / speedDiff);
-		int GhostTickUnscaled = Ghost.m_StartTick*speedDiff + PlaybackTick;
+		int GhostTickUnscaled = Ghost.m_StartTick * speedDiff + PlaybackTick;
 		while(Ghost.m_PlaybackPos >= 0 && Ghost.m_Path.Get(Ghost.m_PlaybackPos)->m_Tick < GhostTick)
 		{
 			if(Ghost.m_PlaybackPos < Ghost.m_Path.Size() - 1)
@@ -350,7 +350,7 @@ void CGhost::OnRender()
 		int TickDiff = Player.m_Tick - Prev.m_Tick;
 		float IntraTick = 0.f;
 		if(TickDiff > 0)
-			IntraTick = (GhostTickUnscaled - Prev.m_Tick*speedDiff - speedDiff + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (TickDiff*speedDiff);
+			IntraTick = (GhostTickUnscaled - Prev.m_Tick * speedDiff - speedDiff + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (TickDiff * speedDiff);
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTickUnscaled;
 
