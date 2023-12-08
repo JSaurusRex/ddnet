@@ -538,7 +538,11 @@ void CCharacterCore::Move()
 	else
 		m_LeftWall = true;
 
-	if(m_pWorld->m_GameTickSpeed > 50)	//stops players from going into walls, ceilings, etc.
+	vec2 tmpPos = NewPos;
+	tmpPos.x = round_to_int(tmpPos.x*4)/4.0;
+	tmpPos.y = round_to_int(tmpPos.y*4)/4.0;
+
+	if(m_pWorld->m_GameTickSpeed > 50 && m_pCollision->TestBox(tmpPos, PhysicalSizeVec2()))	//stops players from going into walls, ceilings, etc.
 	{
 		bool top = false, down = false, left = false, right = false;
 
@@ -555,10 +559,16 @@ void CCharacterCore::Move()
 			left = true;
 
 		if(down || top)
+		{
 			NewPos.y = round_to_int(NewPos.y);
+			m_Vel.y = 0;
+		}
 
 		if(left || right)
+		{
 			NewPos.x = round_to_int(NewPos.x);
+			m_Vel.x = 0;
+		}
 
 		//corner cases
 		if(m_pCollision->TestBox(vec2(m_Pos.x+16, m_Pos.y+16), vec2(28.0f, 28.0f)) && !down && !right)
