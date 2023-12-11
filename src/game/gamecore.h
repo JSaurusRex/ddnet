@@ -259,7 +259,7 @@ public:
 		int m_OldVelAmount;
 	} m_Ninja;
 
-	enum
+	enum TUNING_SCALE
 	{
 		TUNING_SCALE_NOTHING,
 		TUNING_SCALE_LINEAR,
@@ -267,7 +267,7 @@ public:
 		TUNING_SCALE_FRICTION
 	};
 
-	float ScaleValue(int Scaling, float value);
+	float ScaleValue(TUNING_SCALE Scaling, float value);
 
 	bool m_NewHook;
 

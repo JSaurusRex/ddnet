@@ -134,7 +134,7 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
-float CCharacterCore::ScaleValue(int Scaling, float value)
+float CCharacterCore::ScaleValue(TUNING_SCALE Scaling, float value)
 {
 	if(m_TickSpeed == 50)
 		return value;
