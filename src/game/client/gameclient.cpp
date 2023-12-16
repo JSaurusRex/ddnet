@@ -357,6 +357,7 @@ void CGameClient::OnInit()
 
 	m_GameWorld.m_Core.m_GameTickSpeed = Client()->GameTickSpeed();
 	m_GameWorld.m_pCollision = Collision();
+	Collision()->m_TickSpeed = Client()->GameTickSpeed();
 	m_GameWorld.m_pTuningList = m_aTuningList;
 
 	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
@@ -3514,12 +3515,13 @@ bool CGameClient::IsDisplayingWarning()
 	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
 }
 
-void CGameClient::SetGameTickSpeed(int Tickspeed)
+void CGameClient::SetGameTickSpeed(int TickSpeed)
 {
-	Client()->SetGameTickSpeed(Tickspeed);
-	m_GameWorld.m_Core.m_GameTickSpeed = Tickspeed;
-	m_PredictedWorld.m_Core.m_GameTickSpeed = Tickspeed;
-	m_PrevPredictedWorld.m_Core.m_GameTickSpeed = Tickspeed;
+	Client()->SetGameTickSpeed(TickSpeed);
+	m_GameWorld.m_Core.m_GameTickSpeed = TickSpeed;
+	m_PredictedWorld.m_Core.m_GameTickSpeed = TickSpeed;
+	m_PrevPredictedWorld.m_Core.m_GameTickSpeed = TickSpeed;
+	Collision()->m_TickSpeed = TickSpeed;
 }
 
 CNetObjHandler *CGameClient::GetNetObjHandler()
