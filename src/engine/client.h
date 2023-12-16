@@ -89,7 +89,7 @@ protected:
 	float m_FrameTimeAvg = 0.0001f;
 
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc = nullptr;
-	int m_GameTickSpeed;
+	int m_GameTickSpeed = SERVER_TICK_SPEED;
 
 	char m_aNews[3000] = "";
 	int m_Points = -1;
