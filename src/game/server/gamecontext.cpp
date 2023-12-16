@@ -3581,6 +3581,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_Collision.m_TickSpeed = Server()->TickSpeed();
 	m_World.m_pTuningList = m_aTuningList;
 	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
