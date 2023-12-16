@@ -87,7 +87,7 @@ protected:
 	float m_GlobalTime;
 	float m_RenderFrameTime;
 
-	int m_GameTickSpeed;
+	int m_GameTickSpeed = SERVER_TICK_SPEED;
 
 	float m_FrameTimeAvg;
 
