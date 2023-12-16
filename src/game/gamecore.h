@@ -265,7 +265,7 @@ public:
 		TUNING_SCALE_FRICTION
 	};
 
-	float ScaleValue(TUNING_SCALE Scaling, float value);
+	float PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value);
 
 	bool m_NewHook;
 
