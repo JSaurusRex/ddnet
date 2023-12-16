@@ -425,7 +425,9 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_FeetFlipped = false;
 
-	bool Stationary = Player.m_VelX <= 1 && Player.m_VelX >= -1;
+	int minSpeed = 1 * Client()->GameTickSpeed()/50;
+	
+	bool Stationary = Player.m_VelX <= minSpeed && Player.m_VelX >= -minSpeed;
 	bool InAir = !Collision()->CheckPoint(playerCore.m_Pos.x, playerCore.m_Pos.y + 16);
 	bool Running = Player.m_VelX >= 5000 || Player.m_VelX <= -5000;
 	bool WantOtherDir = (Player.m_Direction == -1 && Vel.x > 0) || (Player.m_Direction == 1 && Vel.x < 0);
