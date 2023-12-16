@@ -560,6 +560,6 @@ Messages = [
 	]),
     
 	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
-		NetIntRange("m_TickRate", 1, 1000),
+		NetIntRange("m_TickRate", 50, 200),
 	]),
 ]
