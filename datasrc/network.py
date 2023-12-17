@@ -571,6 +571,7 @@ Messages = [
 
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
 			NetStringStrict("m_pName")
+	]),
 
 	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
 		NetIntRange("m_TickRate", 50, 200),
