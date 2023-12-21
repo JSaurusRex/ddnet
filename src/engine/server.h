@@ -8,6 +8,7 @@
 
 #include <base/hash.h>
 #include <base/math.h>
+#include <base/system.h>
 
 #include "kernel.h"
 #include "message.h"
@@ -26,7 +27,7 @@ enum
 
 class IServer : public IInterface
 {
-	MACRO_INTERFACE("server", 0)
+	MACRO_INTERFACE("server")
 protected:
 	int m_CurrentGameTick;
 
@@ -245,6 +246,7 @@ public:
 	virtual void StartRecord(int ClientID) = 0;
 	virtual void StopRecord(int ClientID) = 0;
 	virtual bool IsRecording(int ClientID) = 0;
+	virtual void StopDemos() = 0;
 
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) const = 0;
 
@@ -274,7 +276,7 @@ public:
 
 class IGameServer : public IInterface
 {
-	MACRO_INTERFACE("gameserver", 0)
+	MACRO_INTERFACE("gameserver")
 protected:
 public:
 	// `pPersistentData` may be null if this is the first time `IGameServer`

@@ -6,6 +6,7 @@
 #include "mapitems.h"
 #include "teamscore.h"
 
+#include <base/system.h>
 #include <engine/shared/config.h>
 
 const char *CTuningParams::ms_apNames[] =
@@ -575,7 +576,7 @@ void CCharacterCore::Move()
 	m_Pos = NewPos;
 }
 
-void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int tickspeed)
+void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int tickspeed) const
 {
 	pObjCore->m_X = round_to_int(m_Pos.x * (tickspeed > 50 ? 4 : 1));
 	pObjCore->m_Y = round_to_int(m_Pos.y * (tickspeed > 50 ? 4 : 1));

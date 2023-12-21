@@ -78,10 +78,6 @@ enum
 };
 '''
 
-RawSource = '''
-#include "protocol.h"
-'''
-
 Enums = [
 	Enum("EMOTE", Emotes),
 	Enum("POWERUP", Powerups),
@@ -439,7 +435,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_VoteSet", [
-		NetIntRange("m_Timeout", 0, 60),
+		NetIntRange("m_Timeout", 0, 'max_int'),
 		NetStringStrict("m_pDescription"),
 		NetStringStrict("m_pReason"),
 	]),
@@ -549,7 +545,7 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
-    
+
 	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
@@ -558,7 +554,25 @@ Messages = [
 	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
 		NetIntRange("m_Voted", -1, 1),
 	]),
-    
+
+	NetMessageEx("Sv_RaceFinish", "racefinish@netmsg.ddnet.org", [
+		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_Time"),
+		NetIntAny("m_Diff"),
+		NetBool("m_RecordPersonal"),
+		NetBool("m_RecordServer", default=False),
+	]),
+
+	NetMessageEx("Sv_CommandInfo", "commandinfo@netmsg.ddnet.org", [
+			NetStringStrict("m_pName"),
+			NetStringStrict("m_pArgsFormat"),
+			NetStringStrict("m_pHelpText")
+	]),
+
+	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
+			NetStringStrict("m_pName")
+	]),
+
 	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
 		NetIntRange("m_TickRate", 50, 200),
 	]),

@@ -7,6 +7,7 @@
 #include "warning.h"
 
 #include <base/color.h>
+#include <base/system.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -232,7 +233,7 @@ typedef std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImage
 
 class IGraphics : public IInterface
 {
-	MACRO_INTERFACE("graphics", 0)
+	MACRO_INTERFACE("graphics")
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
@@ -547,7 +548,7 @@ protected:
 
 class IEngineGraphics : public IGraphics
 {
-	MACRO_INTERFACE("enginegraphics", 0)
+	MACRO_INTERFACE("enginegraphics")
 public:
 	virtual int Init() = 0;
 	virtual void Shutdown() override = 0;

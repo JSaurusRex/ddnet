@@ -374,7 +374,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	}
 }
 
-bool CGameWorld::IsLocalTeam(int OwnerID)
+bool CGameWorld::IsLocalTeam(int OwnerID) const
 {
 	return OwnerID < 0 || m_Teams.CanCollide(m_LocalClientID, OwnerID);
 }
@@ -701,7 +701,7 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	return 0;
 }
 
-void CGameWorld::OnModified()
+void CGameWorld::OnModified() const
 {
 	if(m_pChild)
 		m_pChild->m_IsValidCopy = false;

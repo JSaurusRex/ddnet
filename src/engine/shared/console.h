@@ -5,6 +5,7 @@
 
 #include "memheap.h"
 #include <base/math.h>
+#include <base/system.h>
 #include <engine/console.h>
 #include <engine/storage.h>
 
@@ -46,8 +47,6 @@ class CConsole : public IConsole
 	};
 
 	CExecFile *m_pFirstExec;
-	IConfigManager *m_pConfigManager;
-	CConfig *m_pConfig;
 	IStorage *m_pStorage;
 	int m_AccessLevel;
 
@@ -59,9 +58,6 @@ class CConsole : public IConsole
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
-	static void Con_Reset(IResult *pResult, void *pUserData);
-	static void ConToggle(IResult *pResult, void *pUser);
-	static void ConToggleStroke(IResult *pResult, void *pUser);
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
@@ -141,7 +137,7 @@ class CConsole : public IConsole
 
 		int m_Victim;
 		void ResetVictim();
-		bool HasVictim();
+		bool HasVictim() const;
 		void SetVictim(int Victim);
 		void SetVictim(const char *pVictim);
 		int GetVictim() const override;
@@ -194,9 +190,6 @@ class CConsole : public IConsole
 	bool m_Cheated;
 
 public:
-	IConfigManager *ConfigManager() { return m_pConfigManager; }
-	CConfig *Config() { return m_pConfig; }
-
 	CConsole(int FlagMask);
 	~CConsole();
 
@@ -225,7 +218,7 @@ public:
 	void InitChecksum(CChecksumData *pData) const override;
 
 	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-	void ResetGameSettings() override;
+
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);

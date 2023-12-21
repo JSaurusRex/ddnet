@@ -51,8 +51,8 @@
 #include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
+#include "components/infomessages.h"
 #include "components/items.h"
-#include "components/killmessages.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -135,7 +135,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Hud,
 					      &m_Spectator,
 					      &m_Emoticon,
-					      &m_KillMessages,
+					      &m_InfoMessages,
 					      &m_Chat,
 					      &m_Broadcast,
 					      &m_DebugHud,
@@ -532,7 +532,7 @@ void CGameClient::OnConnected()
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
 	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_PredictedDummyID = -1;
-	Console()->ResetGameSettings();
+	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
@@ -753,7 +753,7 @@ void CGameClient::OnDummyDisconnect()
 	m_PredictedDummyID = -1;
 }
 
-int CGameClient::GetLastRaceTick()
+int CGameClient::GetLastRaceTick() const
 {
 	return m_Ghost.GetLastRaceTick();
 }
@@ -2356,7 +2356,7 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 }
 
-void CGameClient::SendKill(int ClientID)
+void CGameClient::SendKill(int ClientID) const
 {
 	CNetMsg_Cl_Kill Msg;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
@@ -2832,7 +2832,7 @@ void CGameClient::Echo(const char *pString)
 	m_Chat.Echo(pString);
 }
 
-bool CGameClient::IsOtherTeam(int ClientID)
+bool CGameClient::IsOtherTeam(int ClientID) const
 {
 	bool Local = m_Snap.m_LocalClientID == ClientID;
 
@@ -2855,7 +2855,7 @@ bool CGameClient::IsOtherTeam(int ClientID)
 	return m_Teams.Team(ClientID) != m_Teams.Team(m_Snap.m_LocalClientID);
 }
 
-int CGameClient::SwitchStateTeam()
+int CGameClient::SwitchStateTeam() const
 {
 	if(m_aSwitchStateTeam[g_Config.m_ClDummy] >= 0)
 		return m_aSwitchStateTeam[g_Config.m_ClDummy];
@@ -2866,7 +2866,7 @@ int CGameClient::SwitchStateTeam()
 	return m_Teams.Team(m_Snap.m_LocalClientID);
 }
 
-bool CGameClient::IsLocalCharSuper()
+bool CGameClient::IsLocalCharSuper() const
 {
 	if(m_Snap.m_LocalClientID < 0)
 		return false;
@@ -3409,7 +3409,7 @@ void CGameClient::RefindSkins()
 	}
 	m_Ghost.RefindSkins();
 	m_Chat.RefindSkins();
-	m_KillMessages.RefindSkins();
+	m_InfoMessages.RefindSkins();
 }
 
 static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
@@ -3505,12 +3505,12 @@ void CGameClient::DummyResetInput()
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
 }
 
-bool CGameClient::CanDisplayWarning()
+bool CGameClient::CanDisplayWarning() const
 {
 	return m_Menus.CanDisplayWarning();
 }
 
-bool CGameClient::IsDisplayingWarning()
+bool CGameClient::IsDisplayingWarning() const
 {
 	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
 }

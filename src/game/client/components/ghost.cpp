@@ -712,7 +712,7 @@ void CGhost::OnMapLoad()
 	m_AllowRestart = false;
 }
 
-int CGhost::GetLastRaceTick()
+int CGhost::GetLastRaceTick() const
 {
 	return m_LastRaceTick;
 }
