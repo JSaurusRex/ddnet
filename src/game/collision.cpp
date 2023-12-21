@@ -501,6 +501,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 	float Distance = length(Vel);
 	int Max = (int)Distance;
 
+	if(m_TickSpeed > 50)
+		Max*= 16;
+
 	if(Distance > 0.00001f)
 	{
 		float Fraction = 1.0f / (float)(Max + 1);
