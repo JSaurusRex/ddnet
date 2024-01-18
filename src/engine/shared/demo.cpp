@@ -22,13 +22,14 @@ const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
-static const unsigned char gs_CurVersion = 7;
+static const unsigned char gs_CurVersion = 6;
 static const unsigned char gs_OldVersion = 3;
 static const unsigned char gs_Sha256Version = 6;
-static const unsigned char gs_CustomTickrateVersion = 7;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
-static const int gs_NumMarkersOffset = 176 + sizeof(int);
+static const int gs_NumMarkersOffset = 176;
+
+static const unsigned char dh_Version = 1;
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
@@ -132,6 +133,19 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// write header
 	CDemoHeader Header;
 	mem_zero(&Header, sizeof(Header));
+
+	if(tickrate != 50)
+	{
+		io_write(DemoFile, &Header, sizeof(Header));	//hack to detect newer version to get around version limit
+
+		io_write(DemoFile, &dh_Version, sizeof(char));
+		int size = sizeof(int)*1;
+		io_write(DemoFile, &size, sizeof(int));
+		io_write(DemoFile, &tickrate, sizeof(int));
+
+		m_dhSize = size+sizeof(Header);
+	}
+
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion);
@@ -142,7 +156,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
-	io_write(DemoFile, &tickrate, sizeof(int));
 
 	CTimelineMarkers TimelineMarkers;
 	mem_zero(&TimelineMarkers, sizeof(TimelineMarkers));
@@ -351,7 +364,7 @@ int CDemoRecorder::Stop()
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
-	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
+	io_seek(m_File, gs_NumMarkersOffset+m_dhSize, IOSEEK_START);
 	unsigned char aNumMarkers[sizeof(int32_t)];
 	uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
@@ -1048,6 +1061,44 @@ void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
 }
 
+bool CDemoPlayer::ReadDDNetHeader(IOHANDLE File, CInfo *pCInfo) const
+{
+
+
+	unsigned char version = 0;
+	if(io_read(File, &version, sizeof(unsigned char)) != sizeof(unsigned char))
+		return false;
+		
+	unsigned int size = 0;
+	if(io_read(File, &size, sizeof(unsigned int)) != sizeof(unsigned int))
+		return false;
+
+	int start = io_tell(File);
+	
+	if(!pCInfo)
+	{
+		if(io_seek(File, start+size, IOSEEK_START))
+			return false;
+		return true;	//not wrong just not needed
+	}
+
+	if(version < 1)
+		return false;
+	
+	int tickSpeed;
+	if(io_read(File, &tickSpeed, sizeof(int)) != sizeof(int))
+		return false;
+
+	pCInfo->m_TickSpeed = tickSpeed;
+
+	//to expend with more variables simply increase dh_Version and add an if statement
+
+	if(io_seek(File, start+size, IOSEEK_START))
+		return false;
+	
+	return true;
+}
+
 bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, CInfo *pCInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
@@ -1064,27 +1115,27 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 
 	if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid())
 	{
-		if(pErrorMessage != nullptr)
-			str_copy(pErrorMessage, "Error reading demo header", ErrorMessageSize);
-		mem_zero(pDemoHeader, sizeof(CDemoHeader));
-		io_close(File);
-		return false;
-	}
-
-	if(pDemoHeader->m_Version >= gs_CustomTickrateVersion)
-	{
-		int tickSpeed;
-		if(io_read(File, &tickSpeed, sizeof(int)) != sizeof(int))
+		bool invalid = true;
+		unsigned char zeroMem[sizeof(CDemoHeader)] = {0};
+		if(mem_comp(zeroMem, pDemoHeader, sizeof(CDemoHeader)))
+		{
+			//workaround for version conflicts with vanilla
+			if(ReadDDNetHeader(File, pCInfo))
+			{
+				invalid = false;
+				if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid())
+					invalid = true;
+			}
+		}
+		
+		if(invalid)
 		{
 			if(pErrorMessage != nullptr)
-				str_copy(pErrorMessage, "Error reading tickrate", ErrorMessageSize);
+				str_copy(pErrorMessage, "Error reading demo header", ErrorMessageSize);
 			mem_zero(pDemoHeader, sizeof(CDemoHeader));
 			io_close(File);
 			return false;
 		}
-
-		if(pCInfo)
-			pCInfo->m_TickSpeed = tickSpeed;
 	}
 
 	if(pDemoHeader->m_Version < gs_OldVersion)
