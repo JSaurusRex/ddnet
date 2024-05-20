@@ -514,6 +514,11 @@ int64_t CServer::TickStartTime(int Tick)
 	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
+int CServer::TickSpeed()
+{
+	return m_pConfig->m_SvTickRate;
+}
+
 int CServer::Init()
 {
 	for(auto &Client : m_aClients)
