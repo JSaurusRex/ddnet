@@ -369,6 +369,11 @@ Objects = [
 		NetIntAny("m_Layer"),
 		NetIntAny("m_EntityClass"),
 	]),
+    
+	# send inputs ahead of time
+	NetObjectEx("PreInput:PlayerInput", "preinput@netobj.ddnet.tw", [
+        NetIntAny("m_IntendedTick"),
+	]),
 ]
 
 Messages = [
@@ -569,6 +574,10 @@ Messages = [
 
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
 			NetStringStrict("m_pName")
+	]),
+    
+	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
+		NetIntRange("m_TickRate", 50, 200),
 	]),
 
 	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
