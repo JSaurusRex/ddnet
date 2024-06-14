@@ -71,7 +71,7 @@ void CFlag::TickDeferred()
 			}
 			else
 			{
-				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
+				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity / pow(Server()->TickSpeed()/50.0f, 2);
 				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), vec2(0.5, 0.5));
 			}
 		}

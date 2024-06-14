@@ -184,7 +184,7 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 }
 
-float CCharacterCore::PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value) const
+static float CCharacterCore::PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value) const
 {
 	if(m_TickSpeed == 50)
 		return value;	
