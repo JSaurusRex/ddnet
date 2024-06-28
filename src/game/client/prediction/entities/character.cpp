@@ -574,13 +574,13 @@ void CCharacter::ResetInput()
 void CCharacter::PreTick()
 {
 	DDRaceTick();
-
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce);
 }
 
 void CCharacter::Tick()
 {
+	printf("character tick\n");
 	if(m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce)
 	{
 		m_Core.TickDeferred();
@@ -1172,6 +1172,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
+	
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
@@ -1222,7 +1223,9 @@ void CCharacter::ResetPrediction()
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
+	printf("at least here?\n");
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
+	printf("here!\n");
 	m_IsLocal = IsLocal;
 
 	if(pExtended)
@@ -1284,7 +1287,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		// add weapon
 		if(pChar->m_Weapon != WEAPON_NINJA)
 			m_Core.m_aWeapons[pChar->m_Weapon].m_Got = true;
-
+		
 		// jetpack
 		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength > 0)
 		{

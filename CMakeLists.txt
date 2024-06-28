@@ -2790,6 +2790,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     os.cpp
     packer.cpp
     prng.cpp
+    physics_check.cpp
     score.cpp
     secure_random.cpp
     serverbrowser.cpp
@@ -2827,6 +2828,19 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/game/server/teehistorian.h
     src/game/server/scoreworker.cpp
     src/game/server/scoreworker.h
+
+    src/game/generated/server_data.cpp
+    src/game/client/prediction/gameworld.cpp
+    src/game/client/prediction/entities/character.cpp
+    src/game/client/prediction/entities/dragger.cpp
+    src/game/client/prediction/entities/laser.cpp
+    src/game/client/prediction/entities/projectile.cpp
+    src/game/client/prediction/entities/pickup.cpp
+    src/game/client/laser_data.cpp
+    src/game/client/projectile_data.cpp
+    src/game/client/pickup_data.cpp
+    src/game/client/prediction/entity.cpp
+    src/game/generated/client_data.h
   )
 
   set(TARGET_TESTRUNNER testrunner)

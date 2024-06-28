@@ -283,6 +283,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		m_JumpedTotal = 0;
 	}
 
+	printf("m_Direction %i\n", m_Direction);
+
 	// add the speed modification according to players wanted direction
 	if(m_Direction < 0)
 		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
@@ -703,6 +705,12 @@ void CCharacterCore::Quantize()
 
 void CCharacterCore::SetHookedPlayer(int HookedPlayer)
 {
+	if(HookedPlayer < -1)
+	{
+		printf("wtf is happening here with hooked player %i\n", HookedPlayer);
+		return;
+	}
+
 	if(HookedPlayer != m_HookedPlayer)
 	{
 		if(m_HookedPlayer != -1 && m_Id != -1 && m_pWorld)

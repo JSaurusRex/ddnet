@@ -18,7 +18,6 @@ class CLayers
 	int m_LayersStart;
 	CMapItemGroup *m_pGameGroup;
 	CMapItemLayerTilemap *m_pGameLayer;
-	IMap *m_pMap;
 
 	void InitTilemapSkip();
 
@@ -33,6 +32,8 @@ public:
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; }
 	CMapItemGroup *GetGroup(int Index) const;
 	CMapItemLayer *GetLayer(int Index) const;
+
+	IMap *m_pMap;
 
 	// DDRace
 

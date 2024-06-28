@@ -1161,175 +1161,32 @@ void CGameClient::ProcessEvents()
 	}
 }
 
-static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
-{
-	int Version = -1;
-	if(InfoExSize >= 12)
-	{
-		Version = pInfoEx->m_Version;
-	}
-	else if(InfoExSize >= 8)
-	{
-		Version = minimum(pInfoEx->m_Version, 4);
-	}
-	else if(InfoExSize >= 4)
-	{
-		Version = 0;
-	}
-	int Flags = 0;
-	if(Version >= 0)
-	{
-		Flags = pInfoEx->m_Flags;
-	}
-	int Flags2 = 0;
-	if(Version >= 5)
-	{
-		Flags2 = pInfoEx->m_Flags2;
-	}
-	bool Race;
-	bool FastCap;
-	bool FNG;
-	bool DDRace;
-	bool DDNet;
-	bool BlockWorlds;
-	bool City;
-	bool Vanilla;
-	bool Plus;
-	bool FDDrace;
-	if(Version < 1)
-	{
-		const char *pGameType = pFallbackServerInfo->m_aGameType;
-		Race = str_find_nocase(pGameType, "race") || str_find_nocase(pGameType, "fastcap");
-		FastCap = str_find_nocase(pGameType, "fastcap");
-		FNG = str_find_nocase(pGameType, "fng");
-		DDRace = str_find_nocase(pGameType, "ddrace") || str_find_nocase(pGameType, "mkrace");
-		DDNet = str_find_nocase(pGameType, "ddracenet") || str_find_nocase(pGameType, "ddnet");
-		BlockWorlds = str_startswith(pGameType, "bw  ") || str_comp_nocase(pGameType, "bw") == 0;
-		City = str_find_nocase(pGameType, "city");
-		Vanilla = str_comp(pGameType, "DM") == 0 || str_comp(pGameType, "TDM") == 0 || str_comp(pGameType, "CTF") == 0;
-		Plus = str_find(pGameType, "+");
-		FDDrace = false;
-	}
-	else
-	{
-		Race = Flags & GAMEINFOFLAG_GAMETYPE_RACE;
-		FastCap = Flags & GAMEINFOFLAG_GAMETYPE_FASTCAP;
-		FNG = Flags & GAMEINFOFLAG_GAMETYPE_FNG;
-		DDRace = Flags & GAMEINFOFLAG_GAMETYPE_DDRACE;
-		DDNet = Flags & GAMEINFOFLAG_GAMETYPE_DDNET;
-		BlockWorlds = Flags & GAMEINFOFLAG_GAMETYPE_BLOCK_WORLDS;
-		Vanilla = Flags & GAMEINFOFLAG_GAMETYPE_VANILLA;
-		Plus = Flags & GAMEINFOFLAG_GAMETYPE_PLUS;
-		City = Version >= 5 && Flags2 & GAMEINFOFLAG2_GAMETYPE_CITY;
-		FDDrace = Version >= 6 && Flags2 & GAMEINFOFLAG2_GAMETYPE_FDDRACE;
-
-		// Ensure invariants upheld by the server info parsing business.
-		DDRace = DDRace || DDNet || FDDrace;
-		Race = Race || FastCap || DDRace;
-	}
-
-	CGameInfo Info;
-	Info.m_FlagStartsRace = FastCap;
-	Info.m_TimeScore = Race;
-	Info.m_UnlimitedAmmo = Race;
-	Info.m_DDRaceRecordMessage = DDRace && !DDNet;
-	Info.m_RaceRecordMessage = DDNet || (Race && !DDRace);
-	Info.m_RaceSounds = DDRace || FNG || BlockWorlds;
-	Info.m_AllowEyeWheel = DDRace || BlockWorlds || City || Plus;
-	Info.m_AllowHookColl = DDRace;
-	Info.m_AllowZoom = Race || BlockWorlds || City;
-	Info.m_BugDDRaceGhost = DDRace;
-	Info.m_BugDDRaceInput = DDRace;
-	Info.m_BugFNGLaserRange = FNG;
-	Info.m_BugVanillaBounce = Vanilla;
-	Info.m_PredictFNG = FNG;
-	Info.m_PredictDDRace = DDRace;
-	Info.m_PredictDDRaceTiles = DDRace && !BlockWorlds;
-	Info.m_PredictVanilla = Vanilla || FastCap;
-	Info.m_EntitiesDDNet = DDNet;
-	Info.m_EntitiesDDRace = DDRace;
-	Info.m_EntitiesRace = Race;
-	Info.m_EntitiesFNG = FNG;
-	Info.m_EntitiesVanilla = Vanilla;
-	Info.m_EntitiesBW = BlockWorlds;
-	Info.m_Race = Race;
-	Info.m_DontMaskEntities = !DDNet;
-	Info.m_AllowXSkins = false;
-	Info.m_EntitiesFDDrace = FDDrace;
-	Info.m_HudHealthArmor = true;
-	Info.m_HudAmmo = true;
-	Info.m_HudDDRace = false;
-	Info.m_NoWeakHookAndBounce = false;
-	Info.m_NoSkinChangeForFrozen = false;
-
-	if(Version >= 0)
-	{
-		Info.m_TimeScore = Flags & GAMEINFOFLAG_TIMESCORE;
-	}
-	if(Version >= 2)
-	{
-		Info.m_FlagStartsRace = Flags & GAMEINFOFLAG_FLAG_STARTS_RACE;
-		Info.m_UnlimitedAmmo = Flags & GAMEINFOFLAG_UNLIMITED_AMMO;
-		Info.m_DDRaceRecordMessage = Flags & GAMEINFOFLAG_DDRACE_RECORD_MESSAGE;
-		Info.m_RaceRecordMessage = Flags & GAMEINFOFLAG_RACE_RECORD_MESSAGE;
-		Info.m_AllowEyeWheel = Flags & GAMEINFOFLAG_ALLOW_EYE_WHEEL;
-		Info.m_AllowHookColl = Flags & GAMEINFOFLAG_ALLOW_HOOK_COLL;
-		Info.m_AllowZoom = Flags & GAMEINFOFLAG_ALLOW_ZOOM;
-		Info.m_BugDDRaceGhost = Flags & GAMEINFOFLAG_BUG_DDRACE_GHOST;
-		Info.m_BugDDRaceInput = Flags & GAMEINFOFLAG_BUG_DDRACE_INPUT;
-		Info.m_BugFNGLaserRange = Flags & GAMEINFOFLAG_BUG_FNG_LASER_RANGE;
-		Info.m_BugVanillaBounce = Flags & GAMEINFOFLAG_BUG_VANILLA_BOUNCE;
-		Info.m_PredictFNG = Flags & GAMEINFOFLAG_PREDICT_FNG;
-		Info.m_PredictDDRace = Flags & GAMEINFOFLAG_PREDICT_DDRACE;
-		Info.m_PredictDDRaceTiles = Flags & GAMEINFOFLAG_PREDICT_DDRACE_TILES;
-		Info.m_PredictVanilla = Flags & GAMEINFOFLAG_PREDICT_VANILLA;
-		Info.m_EntitiesDDNet = Flags & GAMEINFOFLAG_ENTITIES_DDNET;
-		Info.m_EntitiesDDRace = Flags & GAMEINFOFLAG_ENTITIES_DDRACE;
-		Info.m_EntitiesRace = Flags & GAMEINFOFLAG_ENTITIES_RACE;
-		Info.m_EntitiesFNG = Flags & GAMEINFOFLAG_ENTITIES_FNG;
-		Info.m_EntitiesVanilla = Flags & GAMEINFOFLAG_ENTITIES_VANILLA;
-	}
-	if(Version >= 3)
-	{
-		Info.m_Race = Flags & GAMEINFOFLAG_RACE;
-		Info.m_DontMaskEntities = Flags & GAMEINFOFLAG_DONT_MASK_ENTITIES;
-	}
-	if(Version >= 4)
-	{
-		Info.m_EntitiesBW = Flags & GAMEINFOFLAG_ENTITIES_BW;
-	}
-	if(Version >= 5)
-	{
-		Info.m_AllowXSkins = Flags2 & GAMEINFOFLAG2_ALLOW_X_SKINS;
-	}
-	if(Version >= 6)
-	{
-		Info.m_EntitiesFDDrace = Flags2 & GAMEINFOFLAG2_ENTITIES_FDDRACE;
-	}
-	if(Version >= 7)
-	{
-		Info.m_HudHealthArmor = Flags2 & GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
-		Info.m_HudAmmo = Flags2 & GAMEINFOFLAG2_HUD_AMMO;
-		Info.m_HudDDRace = Flags2 & GAMEINFOFLAG2_HUD_DDRACE;
-	}
-	if(Version >= 8)
-	{
-		Info.m_NoWeakHookAndBounce = Flags2 & GAMEINFOFLAG2_NO_WEAK_HOOK;
-	}
-	if(Version >= 9)
-	{
-		Info.m_NoSkinChangeForFrozen = Flags2 & GAMEINFOFLAG2_NO_SKIN_CHANGE_FOR_FROZEN;
-	}
-
-	return Info;
-}
-
 void CGameClient::InvalidateSnapshot()
 {
 	// clear all pointers
 	mem_zero(&m_Snap, sizeof(m_Snap));
 	m_Snap.m_LocalClientId = -1;
 	SnapCollectEntities();
+}
+
+void print_CharacterCore(CNetObj_CharacterCore * obj)
+{
+	printf("msg_Id: %i\n", obj->ms_MsgId);
+	printf("X: %i\n", obj->m_X);
+	printf("Y: %i\n", obj->m_Y);
+	printf("VelX: %i\n", obj->m_VelX);
+	printf("VelY: %i\n", obj->m_VelY);
+	printf("Tick: %i\n", obj->m_Tick);
+	printf("Angle: %i\n", obj->m_Angle);
+	printf("Direction: %i\n", obj->m_Direction);
+	printf("hookDx: %i\n", obj->m_HookDx);
+	printf("hookDy: %i\n", obj->m_HookDy);
+	printf("HookedPlayer: %i\n", obj->m_HookedPlayer);
+	printf("HookState: %i\n", obj->m_HookState);
+	printf("HookX: %i\n", obj->m_HookX);
+	printf("HookY: %i\n", obj->m_HookY);
+	printf("Jumped: %i\n", obj->m_Jumped);
+	printf("hookTick: %i\n", obj->m_HookTick);
 }
 
 void CGameClient::OnNewSnapshot()
@@ -1498,6 +1355,10 @@ void CGameClient::OnNewSnapshot()
 				{
 					const void *pOld = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, Item.m_Id);
 					m_Snap.m_aCharacters[Item.m_Id].m_Cur = *((const CNetObj_Character *)pData);
+
+					print_CharacterCore((CNetObj_CharacterCore *)pData);
+
+					printf("m_Snap.m_aCharacters[Item.m_Id].m_Cur Direction %i\n", m_Snap.m_aCharacters[Item.m_Id].m_Cur.m_Direction);
 					if(pOld)
 					{
 						m_Snap.m_aCharacters[Item.m_Id].m_Active = true;

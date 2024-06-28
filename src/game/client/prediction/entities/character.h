@@ -141,6 +141,9 @@ public:
 
 	bool IsSuper() { return m_Core.m_Super; }
 
+	// the player core for the physics
+	CCharacterCore m_Core;
+
 private:
 	// weapon info
 	int m_aHitObjects[10];
@@ -164,9 +167,6 @@ private:
 	CNetObj_PlayerInput m_SavedInput;
 
 	int m_NumInputs;
-
-	// the player core for the physics
-	CCharacterCore m_Core;
 
 	// DDRace
 

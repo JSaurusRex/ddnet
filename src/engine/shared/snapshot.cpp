@@ -394,7 +394,6 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 			mem_copy(pObj, pFromItem->Data(), ItemSize);
 		}
 	}
-
 	// unpack updated stuff
 	for(int i = 0; i < pDelta->m_NumUpdateItems; i++)
 	{
@@ -417,7 +416,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 			if(pData + 1 > pEnd)
 				return -103;
 			if(*pData < 0 || (size_t)*pData > std::numeric_limits<int32_t>::max() / sizeof(int32_t))
-				return -204;
+				return -204;	
 			ItemSize = (*pData++) * sizeof(int32_t);
 		}
 
@@ -433,7 +432,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 
 		if(!pNewData)
 			return -302;
-
+		
 		const int FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
 		{

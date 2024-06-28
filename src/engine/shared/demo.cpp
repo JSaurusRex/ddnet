@@ -508,6 +508,8 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 			if(*pTick < 0) // initial tick not initialized before a tick delta
 				return CHUNKHEADER_ERROR;
 			int Tickdelta = Chunk & CHUNKMASK_TICK;
+
+			// printf("branch A\n");
 			NewTick = *pTick + Tickdelta;
 		}
 		else
@@ -515,10 +517,14 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 			unsigned char aTickdata[sizeof(int32_t)];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
 				return CHUNKHEADER_ERROR;
+			
+			// printf("branch B\n");
 			NewTick = bytes_be_to_uint(aTickdata);
 		}
 		if(NewTick < MIN_TICK || NewTick >= MAX_TICK) // invalid tick
 			return CHUNKHEADER_ERROR;
+		
+		// printf("newTick %i\n", *pTick);
 		*pTick = NewTick;
 	}
 	else
@@ -611,6 +617,9 @@ void CDemoPlayer::DoTick()
 	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
+	// printf("m_Info.m_PreviousTick %i\n", m_Info.m_PreviousTick);
+	// printf("m_Info.m_CurrentTick %i\n", m_Info.m_Info.m_CurrentTick);
+
 	int64_t Freq = time_freq();
 	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
 	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
@@ -621,10 +630,12 @@ void CDemoPlayer::DoTick()
 		m_UpdateIntraTimesFunc();
 
 	bool GotSnapshot = false;
-	while(true)
+	while(IsPlaying())
 	{
 		int ChunkType, ChunkSize;
 		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
+
+		// printf("chunkTick %i\n", ChunkTick);
 		if(Result == CHUNKHEADER_EOF)
 		{
 			if(m_Info.m_PreviousTick == -1)
@@ -652,6 +663,7 @@ void CDemoPlayer::DoTick()
 		int DataSize = 0;
 		if(ChunkSize)
 		{
+			// printf("read chunk %i\n", ChunkSize);
 			if(io_read(m_File, m_aCompressedSnapshotData, ChunkSize) != (unsigned)ChunkSize)
 			{
 				Stop("Error reading chunk data");
@@ -673,12 +685,14 @@ void CDemoPlayer::DoTick()
 			}
 		}
 
+		// printf("chunkType %i\n", ChunkType);
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
 			// process delta snapshot
 			CSnapshot *pNewsnap = (CSnapshot *)m_aDeltaSnapshotData;
 			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, m_aCurrentSnapshotData, DataSize);
 
+			// printf("delta datasize %i\n", DataSize);
 			if(DataSize < 0)
 			{
 				if(m_pConsole)
@@ -742,6 +756,7 @@ void CDemoPlayer::DoTick()
 			// check the remaining types
 			if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 			{
+				// printf("set nexttick to %i\n", ChunkTick);
 				m_Info.m_NextTick = ChunkTick;
 				break;
 			}
