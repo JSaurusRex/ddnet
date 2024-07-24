@@ -331,6 +331,10 @@ int CControls::SnapInput(int *pData)
 			Send = true;
 		else if(m_aInputData[g_Config.m_ClDummy].m_PrevWeapon != m_aLastData[g_Config.m_ClDummy].m_PrevWeapon)
 			Send = true;
+		else if(m_aInputData[g_Config.m_ClDummy].m_TargetX != m_aLastData[g_Config.m_ClDummy].m_TargetX)
+			Send = true;
+		else if(m_aInputData[g_Config.m_ClDummy].m_TargetY != m_aLastData[g_Config.m_ClDummy].m_TargetY)
+			Send = true;
 
 		// send at at least 10hz
 		if(time_get() > LastSendTime + time_freq() / 25)

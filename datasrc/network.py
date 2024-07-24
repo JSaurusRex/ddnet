@@ -371,6 +371,11 @@ Objects = [
 		NetIntAny("m_Layer"),
 		NetIntAny("m_EntityClass"),
 	]),
+    
+	# send inputs ahead of time
+	NetObjectEx("PreInput:PlayerInput", "preinput@netobj.ddnet.tw", [
+        NetIntAny("m_IntendedTick"),
+	]),
 ]
 
 Messages = [

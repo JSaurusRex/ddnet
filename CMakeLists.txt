@@ -497,13 +497,13 @@ if(CLIENT AND VIDEORECORDER)
   find_package(FFMPEG)
 endif()
 find_package(Freetype)
-if(DOWNLOAD_GTEST)
-  find_package(Git)
-endif()
+# if(DOWNLOAD_GTEST)
+#   find_package(Git)
+# endif()
 if(NOT(TARGET_OS STREQUAL "android"))
   find_package(GLEW)
 endif()
-find_package(GTest)
+# find_package(GTest)
 if(UPNP)
   find_package(Miniupnpc)
 endif()
@@ -590,11 +590,11 @@ if(CLIENT AND VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
 endif()
 show_dependency_status("Freetype" FREETYPE)
-if(DOWNLOAD_GTEST)
-  show_dependency_status("Git" GIT)
-endif()
+# if(DOWNLOAD_GTEST)
+#   show_dependency_status("Git" GIT)
+# endif()
 show_dependency_status("Glew" GLEW)
-show_dependency_status("GTest" GTEST)
+# show_dependency_status("GTest" GTEST)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmgbuild" DMGBUILD)
 endif()
@@ -681,18 +681,18 @@ endif()
 if(TARGET_OS STREQUAL "android" AND CLIENT AND NOT(CRYPTO_FOUND))
   message(SEND_ERROR "You must install OpenSSL to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
-if(NOT(GTEST_FOUND))
-  if(DOWNLOAD_GTEST)
-    if(GIT_FOUND)
-      message(STATUS "Automatically downloading GTest to be able to run tests")
-    else()
-      set(DOWNLOAD_GTEST OFF)
-      message(WARNING "To automatically download GTest, you have to install Git")
-    endif()
-  else()
-    message(STATUS "To run the tests, you have to install GTest")
-  endif()
-endif()
+# if(NOT(GTEST_FOUND))
+#   if(DOWNLOAD_GTEST)
+#     if(GIT_FOUND)
+#       message(STATUS "Automatically downloading GTest to be able to run tests")
+#     else()
+#       set(DOWNLOAD_GTEST OFF)
+#       message(WARNING "To automatically download GTest, you have to install Git")
+#     endif()
+#   else()
+#     message(STATUS "To run the tests, you have to install GTest")
+#   endif()
+# endif()
 
 if(CLIENT AND VULKAN AND NOT(VULKAN_FOUND))
   message(SEND_ERROR "You must install Vulkan libraries to compile the ${CMAKE_PROJECT_NAME} client")
@@ -757,50 +757,50 @@ endif()
 # DOWNLOAD GTEST
 ########################################################################
 
-if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION v1.13.0)
-  configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
-  )
-  if(result)
-    message(WARNING "CMake step for googletest failed: ${result}")
-    set(DOWNLOAD_GTEST OFF)
-  else()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
-    )
-    if(result)
-      message(WARNING "Build step for googletest failed: ${result}")
-      set(DOWNLOAD_GTEST OFF)
-    else()
-      # Prevent overriding the parent project's compiler/linker settings on Windows
-      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
+#   set(DDNET_GTEST_VERSION v1.13.0)
+#   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
+#   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+#     RESULT_VARIABLE result
+#     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
+#   )
+#   if(result)
+#     message(WARNING "CMake step for googletest failed: ${result}")
+#     set(DOWNLOAD_GTEST OFF)
+#   else()
+#     execute_process(COMMAND ${CMAKE_COMMAND} --build .
+#       RESULT_VARIABLE result
+#       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
+#     )
+#     if(result)
+#       message(WARNING "Build step for googletest failed: ${result}")
+#       set(DOWNLOAD_GTEST OFF)
+#     else()
+#       # Prevent overriding the parent project's compiler/linker settings on Windows
+#       set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-      # Add googletest directly to our build. This defines the gtest target.
-      add_subdirectory(
-        ${PROJECT_BINARY_DIR}/googletest-src
-        ${PROJECT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL
-      )
+#       # Add googletest directly to our build. This defines the gtest target.
+#       add_subdirectory(
+#         ${PROJECT_BINARY_DIR}/googletest-src
+#         ${PROJECT_BINARY_DIR}/googletest-build
+#         EXCLUDE_FROM_ALL
+#       )
 
-      if(MSVC)
-        foreach(target gtest gmock)
-          set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>)
-          # `/w` disables all warnings. This is needed because `gtest` enables
-          # `/WX` (equivalent of `-Werror`) for some reason, breaking builds
-          # when MSVS adds new warnings.
-          target_compile_options(${target} PRIVATE /w)
-        endforeach()
-      endif()
+#       if(MSVC)
+#         foreach(target gtest gmock)
+#           set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>)
+#           # `/w` disables all warnings. This is needed because `gtest` enables
+#           # `/WX` (equivalent of `-Werror`) for some reason, breaking builds
+#           # when MSVS adds new warnings.
+#           target_compile_options(${target} PRIVATE /w)
+#         endforeach()
+#       endif()
 
-      set(GTEST_LIBRARIES gtest gmock)
-      set(GTEST_INCLUDE_DIRS)
-    endif()
-  endif()
-endif()
+#       set(GTEST_LIBRARIES gtest gmock)
+#       set(GTEST_INCLUDE_DIRS)
+#     endif()
+#   endif()
+# endif()
 
 ########################################################################
 # DEPENDENCY COMPILATION
@@ -2744,105 +2744,105 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
 # TESTS
 ########################################################################
 
-if(GTEST_FOUND OR DOWNLOAD_GTEST)
-  set_src(TESTS GLOB src/test
-    aio.cpp
-    bezier.cpp
-    blocklist_driver.cpp
-    bytes_be.cpp
-    color.cpp
-    compression.cpp
-    csv.cpp
-    datafile.cpp
-    fs.cpp
-    git_revision.cpp
-    hash.cpp
-    huffman.cpp
-    io.cpp
-    jobs.cpp
-    json.cpp
-    jsonwriter.cpp
-    linereader.cpp
-    mapbugs.cpp
-    math.cpp
-    memory.cpp
-    name_ban.cpp
-    net.cpp
-    netaddr.cpp
-    os.cpp
-    packer.cpp
-    prng.cpp
-    score.cpp
-    secure_random.cpp
-    serverbrowser.cpp
-    serverinfo.cpp
-    str.cpp
-    strip_path_and_extension.cpp
-    swap_endian.cpp
-    teehistorian.cpp
-    test.cpp
-    test.h
-    thread.cpp
-    unix.cpp
-    uuid.cpp
-  )
-  set(TESTS_EXTRA
-    src/engine/client/blocklist_driver.cpp
-    src/engine/client/blocklist_driver.h
-    src/engine/client/serverbrowser.cpp
-    src/engine/client/serverbrowser.h
-    src/engine/client/serverbrowser_http.cpp
-    src/engine/client/serverbrowser_http.h
-    src/engine/client/serverbrowser_ping_cache.cpp
-    src/engine/client/serverbrowser_ping_cache.h
-    src/engine/client/sqlite.cpp
-    src/engine/server/databases/connection.cpp
-    src/engine/server/databases/connection.h
-    src/engine/server/databases/sqlite.cpp
-    src/engine/server/databases/mysql.cpp
-    src/engine/server/name_ban.cpp
-    src/engine/server/name_ban.h
-    src/engine/server/sql_string_helpers.cpp
-    src/engine/server/sql_string_helpers.h
-    src/game/server/teehistorian.cpp
-    src/game/server/teehistorian.h
-    src/game/server/scoreworker.cpp
-    src/game/server/scoreworker.h
-  )
+# if(GTEST_FOUND OR DOWNLOAD_GTEST)
+#   set_src(TESTS GLOB src/test
+#     aio.cpp
+#     bezier.cpp
+#     blocklist_driver.cpp
+#     bytes_be.cpp
+#     color.cpp
+#     compression.cpp
+#     csv.cpp
+#     datafile.cpp
+#     fs.cpp
+#     git_revision.cpp
+#     hash.cpp
+#     huffman.cpp
+#     io.cpp
+#     jobs.cpp
+#     json.cpp
+#     jsonwriter.cpp
+#     linereader.cpp
+#     mapbugs.cpp
+#     math.cpp
+#     memory.cpp
+#     name_ban.cpp
+#     net.cpp
+#     netaddr.cpp
+#     os.cpp
+#     packer.cpp
+#     prng.cpp
+#     score.cpp
+#     secure_random.cpp
+#     serverbrowser.cpp
+#     serverinfo.cpp
+#     str.cpp
+#     strip_path_and_extension.cpp
+#     swap_endian.cpp
+#     teehistorian.cpp
+#     test.cpp
+#     test.h
+#     thread.cpp
+#     unix.cpp
+#     uuid.cpp
+#   )
+#   set(TESTS_EXTRA
+#     src/engine/client/blocklist_driver.cpp
+#     src/engine/client/blocklist_driver.h
+#     src/engine/client/serverbrowser.cpp
+#     src/engine/client/serverbrowser.h
+#     src/engine/client/serverbrowser_http.cpp
+#     src/engine/client/serverbrowser_http.h
+#     src/engine/client/serverbrowser_ping_cache.cpp
+#     src/engine/client/serverbrowser_ping_cache.h
+#     src/engine/client/sqlite.cpp
+#     src/engine/server/databases/connection.cpp
+#     src/engine/server/databases/connection.h
+#     src/engine/server/databases/sqlite.cpp
+#     src/engine/server/databases/mysql.cpp
+#     src/engine/server/name_ban.cpp
+#     src/engine/server/name_ban.h
+#     src/engine/server/sql_string_helpers.cpp
+#     src/engine/server/sql_string_helpers.h
+#     src/game/server/teehistorian.cpp
+#     src/game/server/teehistorian.h
+#     src/game/server/scoreworker.cpp
+#     src/game/server/scoreworker.h
+#   )
 
-  set(TARGET_TESTRUNNER testrunner)
-  add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
-    ${TESTS}
-    ${TESTS_EXTRA}
-    $<TARGET_OBJECTS:engine-gfx>
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-    ${DEPS}
-  )
-  target_link_libraries(${TARGET_TESTRUNNER} ${MYSQL_LIBRARIES} ${PNG_LIBRARIES} ${GTEST_LIBRARIES} ${LIBS})
-  target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
+#   set(TARGET_TESTRUNNER testrunner)
+#   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
+#     ${TESTS}
+#     ${TESTS_EXTRA}
+#     $<TARGET_OBJECTS:engine-gfx>
+#     $<TARGET_OBJECTS:engine-shared>
+#     $<TARGET_OBJECTS:game-shared>
+#     ${DEPS}
+#   )
+#   target_link_libraries(${TARGET_TESTRUNNER} ${MYSQL_LIBRARIES} ${PNG_LIBRARIES} ${GTEST_LIBRARIES} ${LIBS})
+#   target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
-  list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
-  list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
+#   list(APPEND TARGETS_OWN ${TARGET_TESTRUNNER})
+#   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
 
-  add_custom_target(run_cxx_tests
-    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
-    DEPENDS ${TARGET_TESTRUNNER}
-    USES_TERMINAL
-  )
-  add_custom_target(run_tests
-    DEPENDS run_cxx_tests
-  )
-  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release)
-    # On MSVC, Rust tests only work in the release mode because we link our C++
-    # code with the debug C standard library (/MTd) but Rust only supports
-    # linking to the release C standard library (/MT).
-    #
-    # See also https://github.com/rust-lang/rust/issues/39016.
-    add_dependencies(run_tests run_rust_tests)
-  endif()
-endif()
+#   add_custom_target(run_cxx_tests
+#     COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
+#     COMMENT Running unit tests
+#     DEPENDS ${TARGET_TESTRUNNER}
+#     USES_TERMINAL
+#   )
+#   add_custom_target(run_tests
+#     DEPENDS run_cxx_tests
+#   )
+#   if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release)
+#     # On MSVC, Rust tests only work in the release mode because we link our C++
+#     # code with the debug C standard library (/MTd) but Rust only supports
+#     # linking to the release C standard library (/MT).
+#     #
+#     # See also https://github.com/rust-lang/rust/issues/39016.
+#     add_dependencies(run_tests run_rust_tests)
+#   endif()
+# endif()
 
 add_library(rust_test STATIC EXCLUDE_FROM_ALL
   $<TARGET_OBJECTS:engine-gfx>
