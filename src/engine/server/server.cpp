@@ -602,8 +602,20 @@ int64_t CServer::TickStartTime(int Tick)
 	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
+int lastTickrate = SERVER_TICK_SPEED;
 int CServer::TickSpeed()
 {
+	if(m_pConfig->m_SvTickRate != lastTickrate)
+	{
+		lastTickrate = m_pConfig->m_SvTickRate;
+
+		//send update to clients
+		CNetMsg_Sv_TickRate Msg;
+		Msg.m_TickRate = m_pConfig->m_SvTickRate;
+		SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+		//todo, update other parts
+	}
 	return m_pConfig->m_SvTickRate;
 }
 
