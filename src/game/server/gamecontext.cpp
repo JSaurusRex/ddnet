@@ -1774,7 +1774,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		return true;
 	}
 
-	if(ClientVersion < VERSION_DDNET_TICKSPEED && Server()->TickSpeed() != 50)
+	if(ClientVersion < VERSION_DDNET_TICKSPEED && Server()->TickSpeed() != 50 && false)
 	{
 		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
 		return true;

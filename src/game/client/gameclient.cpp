@@ -821,6 +821,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		return;
 	}
 
+	if(NETMSGTYPE_SV_TICKRATE == MsgId)
+	{
+		printf("CLIENT \n\n NETMSGTYPE_SV_TICKRATE\n\n");
+	}
+
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
 	{

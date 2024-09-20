@@ -2336,6 +2336,11 @@ void CClient::OnDemoPlayerMessage(void *pData, int Size)
 		return;
 	}
 
+	if(Msg == NETMSGTYPE_SV_TICKRATE)
+	{
+		Sys = false;
+	}
+
 	if(!Sys)
 		GameClient()->OnMessage(Msg, &Unpacker, CONN_MAIN, false);
 }
@@ -3571,7 +3576,6 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	// enter demo playback state
 	SetState(IClient::STATE_DEMOPLAYBACK);
-	GameClient()->SetGameTickSpeed(m_DemoPlayer.Info()->m_Info.m_TickSpeed);
 
 	m_DemoPlayer.Play();
 	GameClient()->OnEnterGame();
@@ -3646,6 +3650,13 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
 
 		m_aDemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, GameTickSpeed(), m_pMap->File());
+
+		//add tickrate message manually to ensure its in demo
+		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKRATE, true);
+		TickMsg.AddInt(GameTickSpeed());
+		CPacker Packer;
+		RepackMsg(&TickMsg, Packer);
+		m_aDemoRecorder[Recorder].RecordMessage(Packer.Data(), Packer.Size());
 	}
 }
 
