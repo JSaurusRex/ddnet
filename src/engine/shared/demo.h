@@ -43,7 +43,7 @@ public:
 	CDemoRecorder() {}
 	~CDemoRecorder() override;
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, int tickrate, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, int TickSpeed, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
 	int Stop() override;
 
 	void AddDemoMarker();
@@ -56,7 +56,7 @@ public:
 	char *GetCurrentFilename() override { return m_aCurrentFilename; }
 	void ClearCurrentFilename() { m_aCurrentFilename[0] = '\0'; }
 
-	int Length() const override { return (m_LastTickMarker - m_FirstTick) / (m_TickRate ? m_TickRate : SERVER_TICK_SPEED); }
+	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; } //todo calculate length poperly for higher tickrates
 };
 
 class CDemoPlayer : public IDemoPlayer
@@ -163,6 +163,7 @@ public:
 	int SeekTime(float Seconds) override;
 	int SeekTick(ETickOffset TickOffset) override;
 	int SetPos(int WantedTick) override;
+	void SetTickSpeed(int TickSpeed) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool ReadDDNetHeader(IOHANDLE File, CInfo *pCInfo) const;
@@ -175,6 +176,8 @@ public:
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
 	const CMapInfo *GetMapInfo() const { return &m_MapInfo; }
+
+	int m_Tickspeed;
 };
 
 class CDemoEditor : public IDemoEditor

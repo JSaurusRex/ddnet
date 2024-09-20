@@ -535,6 +535,8 @@ void CGameClient::OnConnected()
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
+	SetGameTickSpeed(SERVER_TICK_SPEED);
+
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
 		Client()->DemoRecorder_HandleAutoStart();
 }
@@ -821,11 +823,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		return;
 	}
 
-	if(NETMSGTYPE_SV_TICKRATE == MsgId)
-	{
-		printf("CLIENT \n\n NETMSGTYPE_SV_TICKRATE\n\n");
-	}
-
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgId, pUnpacker);
 	if(!pRawMsg)
 	{
@@ -913,6 +910,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		CNetMsg_Sv_TickRate *pMsg = (CNetMsg_Sv_TickRate *)pRawMsg;
 		SetGameTickSpeed(pMsg->m_TickRate);
+		m_pDemoPlayer->SetTickSpeed(pMsg->m_TickRate);
 	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{

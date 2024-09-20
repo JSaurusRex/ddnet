@@ -8,6 +8,8 @@
 
 #include <engine/shared/config.h>
 
+#include <game/generated/protocol.h>
+
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
 #endif
@@ -60,7 +62,7 @@ CDemoRecorder::~CDemoRecorder()
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, int tickrate, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, int TickSpeed, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
@@ -134,18 +136,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	CDemoHeader Header;
 	mem_zero(&Header, sizeof(Header));
 
-	if(tickrate != 50)
-	{
-		io_write(DemoFile, &Header, sizeof(Header));	//hack to detect newer version to get around version limit
-
-		io_write(DemoFile, &dh_Version, sizeof(char));
-		int size = sizeof(int)*1;
-		io_write(DemoFile, &size, sizeof(int));
-		io_write(DemoFile, &tickrate, sizeof(int));
-
-		m_dhSize = size+sizeof(Header);
-	}
-
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion);
@@ -203,6 +193,25 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	}
 	m_File = DemoFile;
 	str_copy(m_aCurrentFilename, pFilename);
+
+	if(TickSpeed != 50)
+	{
+		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKRATE, true);
+		TickMsg.AddInt(TickSpeed);
+		CPacker Packer;
+		Packer.Reset();
+		if(TickMsg.m_MsgID < OFFSET_UUID)
+		{
+			Packer.AddInt((TickMsg.m_MsgID << 1) | (TickMsg.m_System ? 1 : 0));
+		}
+		else
+		{
+			Packer.AddInt(TickMsg.m_System ? 1 : 0); // NETMSG_EX, NETMSGTYPE_EX
+			g_UuidManager.PackUuid(TickMsg.m_MsgID, &Packer);
+		}
+		Packer.AddRaw(TickMsg.Data(), TickMsg.Size());
+		RecordMessage(Packer.Data(), Packer.Size());
+	}
 
 	return 0;
 }
@@ -969,6 +978,11 @@ int CDemoPlayer::SetPos(int WantedTick)
 	Play();
 
 	return 0;
+}
+
+void CDemoPlayer::SetTickSpeed(int TickSpeed)
+{
+	m_Info.m_Info.m_TickSpeed = TickSpeed;
 }
 
 void CDemoPlayer::SetSpeed(float Speed)

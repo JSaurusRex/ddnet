@@ -3650,13 +3650,6 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
 
 		m_aDemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, GameTickSpeed(), m_pMap->File());
-
-		//add tickrate message manually to ensure its in demo
-		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKRATE, true);
-		TickMsg.AddInt(GameTickSpeed());
-		CPacker Packer;
-		RepackMsg(&TickMsg, Packer);
-		m_aDemoRecorder[Recorder].RecordMessage(Packer.Data(), Packer.Size());
 	}
 }
 
