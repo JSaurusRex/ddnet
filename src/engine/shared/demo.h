@@ -23,7 +23,7 @@ class CDemoRecorder : public IDemoRecorder
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
 	int m_FirstTick;
-	int m_TickRate;
+	int m_TickSpeed;
 	int m_dhSize;
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	class CSnapshotDelta *m_pSnapshotDelta;
@@ -56,7 +56,7 @@ public:
 	char *GetCurrentFilename() override { return m_aCurrentFilename; }
 	void ClearCurrentFilename() { m_aCurrentFilename[0] = '\0'; }
 
-	int Length() const override { return (m_LastTickMarker - m_FirstTick) / m_TickRate; } //todo calculate length poperly for higher tickrates
+	int Length() const override { return (m_LastTickMarker - m_FirstTick) / m_TickSpeed; }
 };
 
 class CDemoPlayer : public IDemoPlayer

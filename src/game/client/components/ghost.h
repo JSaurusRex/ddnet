@@ -17,7 +17,7 @@ enum
 	GHOSTDATA_TYPE_CHARACTER_NO_TICK,
 	GHOSTDATA_TYPE_CHARACTER,
 	GHOSTDATA_TYPE_START_TICK,
-	GHOSTDATA_TYPE_TICKRATE
+	GHOSTDATA_TYPE_TICKSPEED
 };
 
 struct CGhostSkin
@@ -92,7 +92,7 @@ private:
 		CGhostSkin m_Skin;
 		CGhostPath m_Path;
 		int m_StartTick;
-		int m_Tickrate;
+		int m_TickSpeed;
 		char m_aPlayer[MAX_NAME_LENGTH];
 		int m_PlaybackPos;
 

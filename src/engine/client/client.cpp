@@ -2336,7 +2336,7 @@ void CClient::OnDemoPlayerMessage(void *pData, int Size)
 		return;
 	}
 
-	if(Msg == NETMSGTYPE_SV_TICKRATE)
+	if(Msg == NETMSGTYPE_SV_TICKSPEED)
 	{
 		Sys = false;
 	}

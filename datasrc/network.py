@@ -573,7 +573,7 @@ Messages = [
 			NetStringStrict("m_pName")
 	]),
 
-	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
-		NetIntRange("m_TickRate", 50, 200),
+	NetMessageEx("Sv_TickSpeed", "tickspeed@netmsg.ddnet.org", [
+		NetIntRange("m_TickSpeed", 50, 200),
 	]),
 ]

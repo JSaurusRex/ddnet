@@ -72,7 +72,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_pMapData = pMapData;
 	m_pConsole = pConsole;
 
-	m_TickRate = TickSpeed;
+	m_TickSpeed = TickSpeed;
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
@@ -198,7 +198,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	if(TickSpeed != 50)
 	{
-		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKRATE, true);
+		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKSPEED, true);
 		TickMsg.AddInt(TickSpeed);
 		CPacker Packer;
 		Packer.Reset();
@@ -323,7 +323,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
-	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > m_TickRate * 5)
+	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > m_TickSpeed * 5)
 	{
 		// write full tickmarker
 		WriteTickMarker(Tick, true);
@@ -411,7 +411,7 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	if(m_NumTimelineMarkers > 0)
 	{
 		int Diff = Tick - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
-		if(Diff < (float)m_TickRate)
+		if(Diff < (float)m_TickSpeed)
 			return;
 	}
 

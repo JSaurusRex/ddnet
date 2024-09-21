@@ -1782,7 +1782,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 
 	if(Server()->TickSpeed() != 50)
 	{
-		SendTickRate(ClientID);
+		SendTickSpeed(ClientID);
 	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientID];
@@ -4228,10 +4228,10 @@ void CGameContext::SendRecord(int ClientID)
 	}
 }
 
-void CGameContext::SendTickRate(int ClientID)
+void CGameContext::SendTickSpeed(int ClientID)
 {
-	CNetMsg_Sv_TickRate Msg;
-	Msg.m_TickRate = Server()->TickSpeed();
+	CNetMsg_Sv_TickSpeed Msg;
+	Msg.m_TickSpeed = Server()->TickSpeed();
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 

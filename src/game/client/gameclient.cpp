@@ -906,11 +906,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_Ghost.m_AllowRestart = true;
 		m_RaceDemo.m_AllowRestart = true;
 	}
-	else if(MsgId == NETMSGTYPE_SV_TICKRATE)
+	else if(MsgId == NETMSGTYPE_SV_TICKSPEED)
 	{
-		CNetMsg_Sv_TickRate *pMsg = (CNetMsg_Sv_TickRate *)pRawMsg;
-		SetGameTickSpeed(pMsg->m_TickRate);
-		m_pDemoPlayer->SetTickSpeed(pMsg->m_TickRate);
+		CNetMsg_Sv_TickSpeed *pMsg = (CNetMsg_Sv_TickSpeed *)pRawMsg;
+		SetGameTickSpeed(pMsg->m_TickSpeed);
+		m_pDemoPlayer->SetTickSpeed(pMsg->m_TickSpeed);
 	}
 	else if(MsgId == NETMSGTYPE_SV_KILLMSG)
 	{

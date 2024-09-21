@@ -153,7 +153,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharact
 		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), m_CurGhost.m_aPlayer);
 
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &m_CurGhost.m_StartTick, sizeof(int));
-		GhostRecorder()->WriteData(GHOSTDATA_TYPE_TICKRATE, &m_CurGhost.m_Tickrate, sizeof(int));
+		GhostRecorder()->WriteData(GHOSTDATA_TYPE_TICKSPEED, &m_CurGhost.m_TickSpeed, sizeof(int));
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &m_CurGhost.m_Skin, sizeof(CGhostSkin));
 		for(int i = 0; i < NumTicks; i++)
 			GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, m_CurGhost.m_Path.Get(i), sizeof(CGhostCharacter));
@@ -323,7 +323,7 @@ void CGhost::OnRender()
 		if(Ghost.Empty())
 			continue;
 
-		float speedDiff = Client()->GameTickSpeed() / (float)Ghost.m_Tickrate;
+		float speedDiff = Client()->GameTickSpeed() / (float)Ghost.m_TickSpeed;
 
 		int GhostTick = Ghost.m_StartTick + floor(PlaybackTick / speedDiff);
 		int GhostTickUnscaled = Ghost.m_StartTick * speedDiff + PlaybackTick;
@@ -382,7 +382,7 @@ void CGhost::OnRender()
 		}
 
 		//convert positions
-		if(Ghost.m_Tickrate <= 50 && Client()->GameTickSpeed() > 50)
+		if(Ghost.m_TickSpeed <= 50 && Client()->GameTickSpeed() > 50)
 		{
 			Prev.m_X *= 4;
 			Prev.m_Y *= 4;
@@ -391,7 +391,7 @@ void CGhost::OnRender()
 			Player.m_Y *= 4;
 		}
 
-		if(Ghost.m_Tickrate > 50 && Client()->GameTickSpeed() <= 50)
+		if(Ghost.m_TickSpeed > 50 && Client()->GameTickSpeed() <= 50)
 		{
 			Prev.m_X /= 4;
 			Prev.m_Y /= 4;
@@ -437,7 +437,7 @@ void CGhost::StartRecord(int Tick)
 	m_Recording = true;
 	m_CurGhost.Reset();
 	m_CurGhost.m_StartTick = Tick;
-	m_CurGhost.m_Tickrate = Client()->GameTickSpeed();
+	m_CurGhost.m_TickSpeed = Client()->GameTickSpeed();
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
 	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName());
@@ -562,9 +562,9 @@ int CGhost::Load(const char *pFilename)
 			if(!GhostLoader()->ReadData(Type, &pGhost->m_StartTick, sizeof(int)))
 				Error = true;
 		}
-		else if(Type == GHOSTDATA_TYPE_TICKRATE)
+		else if(Type == GHOSTDATA_TYPE_TICKSPEED)
 		{
-			if(!GhostLoader()->ReadData(Type, &pGhost->m_Tickrate, sizeof(int)))
+			if(!GhostLoader()->ReadData(Type, &pGhost->m_TickSpeed, sizeof(int)))
 				Error = true;
 		}
 	}
@@ -591,8 +591,8 @@ int CGhost::Load(const char *pFilename)
 	if(pGhost->m_StartTick == -1)
 		pGhost->m_StartTick = pGhost->m_Path.Get(0)->m_Tick;
 
-	if(pGhost->m_Tickrate <= 0)
-		pGhost->m_Tickrate = 50;
+	if(pGhost->m_TickSpeed <= 0)
+		pGhost->m_TickSpeed = 50;
 
 	if(!FoundSkin)
 		GetGhostSkin(&pGhost->m_Skin, "default", 0, 0, 0);
@@ -625,7 +625,7 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 	GhostRecorder()->Start(pItem->m_aFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), pItem->m_aPlayer);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &pGhost->m_StartTick, sizeof(int));
-	GhostRecorder()->WriteData(GHOSTDATA_TYPE_TICKRATE, &pGhost->m_Tickrate, sizeof(int));
+	GhostRecorder()->WriteData(GHOSTDATA_TYPE_TICKSPEED, &pGhost->m_TickSpeed, sizeof(int));
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &pGhost->m_Skin, sizeof(CGhostSkin));
 	for(int i = 0; i < NumTicks; i++)
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_CHARACTER, pGhost->m_Path.Get(i), sizeof(CGhostCharacter));

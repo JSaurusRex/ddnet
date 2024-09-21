@@ -602,21 +602,21 @@ int64_t CServer::TickStartTime(int Tick)
 	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
-int lastTickrate = SERVER_TICK_SPEED;
+int lastTickSpeed = SERVER_TICK_SPEED;
 int CServer::TickSpeed()
 {
-	if(m_pConfig->m_SvTickRate != lastTickrate)
+	if(m_pConfig->m_SvTickSpeed != lastTickSpeed)
 	{
-		lastTickrate = m_pConfig->m_SvTickRate;
+		lastTickSpeed = m_pConfig->m_SvTickSpeed;
 
 		//send update to clients
-		CNetMsg_Sv_TickRate Msg;
-		Msg.m_TickRate = m_pConfig->m_SvTickRate;
+		CNetMsg_Sv_TickSpeed Msg;
+		Msg.m_TickSpeed = m_pConfig->m_SvTickSpeed;
 		SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 		//todo, update other parts
 	}
-	return m_pConfig->m_SvTickRate;
+	return m_pConfig->m_SvTickSpeed;
 }
 
 int CServer::Init()
@@ -3507,7 +3507,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 	}
 	pServer->m_aDemoRecorder[MAX_CLIENTS].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(),
 		pServer->m_aCurrentMap, pServer->m_aCurrentMapSha256[MAP_TYPE_SIX], pServer->m_aCurrentMapCrc[MAP_TYPE_SIX], "server",
-		pServer->m_aCurrentMapSize[MAP_TYPE_SIX], pServer->m_apCurrentMapData[MAP_TYPE_SIX], pServer->Config()->m_SvTickRate);
+		pServer->m_aCurrentMapSize[MAP_TYPE_SIX], pServer->m_apCurrentMapData[MAP_TYPE_SIX], pServer->Config()->m_SvTickSpeed);
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
