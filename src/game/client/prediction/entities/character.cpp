@@ -638,7 +638,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
 		if(Force == 255 && MaxSpeed)
 		{
-			m_Core.m_Vel = Direction * (MaxSpeed / 5);
+			m_Core.m_Vel = Direction * m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_LINEAR, MaxSpeed / 5);
 		}
 		else
 		{
@@ -673,6 +673,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 				TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
 
 				DiffAngle = SpeederAngle - TeeAngle;
+				Force = m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_ACCEL, Force);
+				MaxSpeed = m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_LINEAR, MaxSpeed);
 				SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
 				if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
@@ -682,7 +684,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 					TempVel += Direction * SpeedLeft;
 			}
 			else
-				TempVel += Direction * Force;
+				TempVel += Direction * m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_ACCEL, Force);
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
