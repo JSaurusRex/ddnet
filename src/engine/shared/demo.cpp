@@ -72,6 +72,8 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_pMapData = pMapData;
 	m_pConsole = pConsole;
 
+	m_TickRate = TickSpeed;
+
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
 	{
