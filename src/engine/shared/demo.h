@@ -24,7 +24,6 @@ class CDemoRecorder : public IDemoRecorder
 	int m_LastKeyFrame;
 	int m_FirstTick;
 	int m_TickSpeed;
-	int m_dhSize;
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	class CSnapshotDelta *m_pSnapshotDelta;
 	int m_NumTimelineMarkers;
@@ -166,8 +165,7 @@ public:
 	void SetTickSpeed(int TickSpeed) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
-	bool ReadDDNetHeader(IOHANDLE File, CInfo *pCInfo) const;
-	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IDemoPlayer::CInfo *pCInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
+	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
 	const char *Filename() { return m_aFilename; }
 	const char *ErrorMessage() { return m_aErrorMessage; }
 
@@ -176,8 +174,6 @@ public:
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
 	const CMapInfo *GetMapInfo() const { return &m_MapInfo; }
-
-	int m_Tickspeed;
 };
 
 class CDemoEditor : public IDemoEditor

@@ -1323,7 +1323,6 @@ void CGameClient::OnNewSnapshot()
 		TempCore.Init(&TempWorld, Collision(), &TempTeams);
 		TempCore.Read(pCharacter, Client()->GameTickSpeed());
 		TempCore.m_ActiveWeapon = pCharacter->m_Weapon;
-		TempCore.m_Tuning = m_GameWorld.m_Core.m_aTuning[g_Config.m_ClDummy];
 
 		while(pCharacter->m_Tick < Tick)
 		{

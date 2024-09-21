@@ -31,8 +31,6 @@ static const unsigned char gs_VersionTickCompression = 5; // demo files with thi
 static const int gs_LengthOffset = 152;
 static const int gs_NumMarkersOffset = 176;
 
-static const unsigned char dh_Version = 1;
-
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
 bool CDemoHeader::Valid() const
@@ -137,7 +135,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// write header
 	CDemoHeader Header;
 	mem_zero(&Header, sizeof(Header));
-
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
 	str_copy(Header.m_aNetversion, pNetVersion);
@@ -375,7 +372,7 @@ int CDemoRecorder::Stop()
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
-	io_seek(m_File, gs_NumMarkersOffset+m_dhSize, IOSEEK_START);
+	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
 	unsigned char aNumMarkers[sizeof(int32_t)];
 	uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
@@ -775,7 +772,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_SpeedIndex = 4;
 	m_LastSnapshotDataSize = -1;
 
-	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_Info.m_Info, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
+	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
 	{
 		str_copy(m_aFilename, "");
 		return -1;
@@ -1077,45 +1074,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
 }
 
-bool CDemoPlayer::ReadDDNetHeader(IOHANDLE File, CInfo *pCInfo) const
-{
-
-
-	unsigned char version = 0;
-	if(io_read(File, &version, sizeof(unsigned char)) != sizeof(unsigned char))
-		return false;
-		
-	unsigned int size = 0;
-	if(io_read(File, &size, sizeof(unsigned int)) != sizeof(unsigned int))
-		return false;
-
-	int start = io_tell(File);
-	
-	if(!pCInfo)
-	{
-		if(io_seek(File, start+size, IOSEEK_START))
-			return false;
-		return true;	//not wrong just not needed
-	}
-
-	if(version < 1)
-		return false;
-	
-	int tickSpeed;
-	if(io_read(File, &tickSpeed, sizeof(int)) != sizeof(int))
-		return false;
-
-	pCInfo->m_TickSpeed = tickSpeed;
-
-	//to expend with more variables simply increase dh_Version and add an if statement
-
-	if(io_seek(File, start+size, IOSEEK_START))
-		return false;
-	
-	return true;
-}
-
-bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, CInfo *pCInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
+bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
@@ -1131,27 +1090,11 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 
 	if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid())
 	{
-		bool invalid = true;
-		unsigned char zeroMem[sizeof(CDemoHeader)] = {0};
-		if(mem_comp(zeroMem, pDemoHeader, sizeof(CDemoHeader)))
-		{
-			//workaround for version conflicts with vanilla
-			if(ReadDDNetHeader(File, pCInfo))
-			{
-				invalid = false;
-				if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid())
-					invalid = true;
-			}
-		}
-		
-		if(invalid)
-		{
-			if(pErrorMessage != nullptr)
-				str_copy(pErrorMessage, "Error reading demo header", ErrorMessageSize);
-			mem_zero(pDemoHeader, sizeof(CDemoHeader));
-			io_close(File);
-			return false;
-		}
+		if(pErrorMessage != nullptr)
+			str_copy(pErrorMessage, "Error reading demo header", ErrorMessageSize);
+		mem_zero(pDemoHeader, sizeof(CDemoHeader));
+		io_close(File);
+		return false;
 	}
 
 	if(pDemoHeader->m_Version < gs_OldVersion)
