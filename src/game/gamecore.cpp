@@ -465,8 +465,8 @@ void CCharacterCore::TickDeferred()
 					if(length(m_Vel) > 0.0001f)
 						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
-					m_Vel += Dir * a * (Velocity * 0.75f) / (m_TickSpeed / 50.0);
-					m_Vel *= pow(0.85f, 1 / (m_TickSpeed / 50.0));
+					m_Vel += Dir * PhysicsTickSpeedScaling(TUNING_SCALE_LINEAR, a * (Velocity * 0.75f));
+					m_Vel *= PhysicsTickSpeedScaling(TUNING_SCALE_FRICTION, 0.85f);
 				}
 
 				// handle hook influence
