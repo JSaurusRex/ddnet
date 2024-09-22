@@ -261,10 +261,10 @@ public:
 
 	enum TUNING_SCALE
 	{
-		TUNING_SCALE_NOTHING,
-		TUNING_SCALE_LINEAR,
-		TUNING_SCALE_ACCEL,
-		TUNING_SCALE_FRICTION
+		TUNING_SCALE_NOTHING,	//no scaling
+		TUNING_SCALE_LINEAR,	//for added forces not executed every tick
+		TUNING_SCALE_ACCEL,		//for forces added every tick
+		TUNING_SCALE_FRICTION	//for multiplying forces
 	};
 
 	float PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value);
@@ -289,6 +289,7 @@ public:
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
+	static vec2 ConvertPosition(vec2 Pos, int TickSpeed) {if(TickSpeed > 50) {Pos.x/=4;Pos.y/=4;} return Pos;}
 	void Read(const CNetObj_CharacterCore *pObjCore, int tickspeed);
 	void Write(CNetObj_CharacterCore *pObjCore, int tickspeed) const;
 	void Quantize();
