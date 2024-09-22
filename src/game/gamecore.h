@@ -234,7 +234,7 @@ public:
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
-	int m_TickSpeed;
+	int m_TickSpeed = SERVER_TICK_SPEED;
 	int m_HookTick;
 	int m_HookState;
 	std::set<int> m_AttachedPlayers;
