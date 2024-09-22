@@ -608,13 +608,7 @@ int CServer::TickSpeed()
 	if(m_pConfig->m_SvTickSpeed != lastTickSpeed)
 	{
 		lastTickSpeed = m_pConfig->m_SvTickSpeed;
-
-		//send update to clients
-		CNetMsg_Sv_TickSpeed Msg;
-		Msg.m_TickSpeed = m_pConfig->m_SvTickSpeed;
-		SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-
-		//todo, update other parts
+		m_MapReload = true;
 	}
 	return m_pConfig->m_SvTickSpeed;
 }
