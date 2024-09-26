@@ -357,7 +357,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		else
 			Strength = GetCharacterByID(Owner)->Tuning()->m_ExplosionStrength;
 
-		float scaleStrength = pChar->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, 1);
+		float scaleStrength = CWorldCore::PhysicsScalingLinear(1, m_Core.m_GameTickSpeed);
 
 		float Dmg = Strength * l;
 		if((int)Dmg)

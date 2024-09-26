@@ -210,7 +210,7 @@ void CCharacter::HandleJetpack()
 			else
 				Strength = TuningList()[m_TuneZone].m_JetpackStrength;
 
-			Strength = m_Core.PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_ACCEL, Strength);
+			Strength = CWorldCore::PhysicsScalingAccel(Strength, Server()->TickSpeed());
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -476,7 +476,7 @@ void CCharacter::FireWeapon()
 			else
 				Strength = TuningList()[m_TuneZone].m_HammerStrength;
 
-			Strength = pTarget->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
+			Strength = CWorldCore::PhysicsScalingLinear(Strength, Server()->TickSpeed());
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -1368,7 +1368,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
 		if(Force == 255 && MaxSpeed)
 		{
-			m_Core.m_Vel = Direction * m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_LINEAR, MaxSpeed / 5);
+			m_Core.m_Vel = Direction * CWorldCore::PhysicsScalingLinear(MaxSpeed / 5, Server()->TickSpeed());
 		}
 		else
 		{
@@ -1403,8 +1403,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 				TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
 
 				DiffAngle = SpeederAngle - TeeAngle;
-				Force = m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_ACCEL, Force);
-				MaxSpeed = m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_LINEAR, MaxSpeed);
+				Force = CWorldCore::PhysicsScalingAccel(Force, Server()->TickSpeed());
+				MaxSpeed = CWorldCore::PhysicsScalingLinear(MaxSpeed, Server()->TickSpeed());
 				SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
 				if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
@@ -1414,7 +1414,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 					TempVel += Direction * SpeedLeft;
 			}
 			else
-				TempVel += Direction * m_Core.PhysicsTickSpeedScaling(m_Core.TUNING_SCALE_ACCEL, Force);
+				TempVel += Direction * CWorldCore::PhysicsScalingAccel(Force, Server()->TickSpeed());
 
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}

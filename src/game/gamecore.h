@@ -215,6 +215,9 @@ public:
 	CPrng *m_pPrng;
 	int m_GameTickSpeed;
 
+	static float PhysicsScalingLinear(float Value, int TickSpeed);
+	static float PhysicsScalingAccel(float Value, int TickSpeed);
+	static float PhysicsScalingFriction(float Value, int TickSpeed);
 	void InitSwitchers(int HighestSwitchNumber);
 	std::vector<SSwitchers> m_vSwitchers;
 };
@@ -258,16 +261,6 @@ public:
 		int m_CurrentMoveTime;
 		int m_OldVelAmount;
 	} m_Ninja;
-
-	enum TUNING_SCALE
-	{
-		TUNING_SCALE_NOTHING,	//no scaling
-		TUNING_SCALE_LINEAR,	//for added forces not executed every tick
-		TUNING_SCALE_ACCEL,		//for forces added every tick
-		TUNING_SCALE_FRICTION	//for multiplying forces
-	};
-
-	float PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value);
 
 	bool m_NewHook;
 
