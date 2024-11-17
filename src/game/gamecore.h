@@ -192,6 +192,7 @@ public:
 	int HookedPlayer() const { return m_HookedPlayer; }
 	void SetHookedPlayer(int HookedPlayer);
 
+	float m_predictionDirectionMultiplier = 1;
 	int m_ActiveWeapon;
 	struct WeaponStat
 	{

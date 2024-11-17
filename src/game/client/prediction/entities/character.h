@@ -158,10 +158,17 @@ private:
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
+public:
 	// input
 	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
+
+	float m_Direction_Timer = 0;
+	int m_Direction_Counter = 0;
+	int m_Direction_Last = 0;
+
+private:
 
 	int m_NumInputs;
 

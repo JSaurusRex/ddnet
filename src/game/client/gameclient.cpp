@@ -1538,6 +1538,28 @@ void CGameClient::OnNewSnapshot()
 		Client.m_SpecCharPresent = false;
 	}
 
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(CCharacter *pChar = m_GameWorld.GetCharacterById(i))
+		{
+			if(i == m_Snap.m_LocalClientId)
+				continue;
+			
+			if(pChar->m_Input.m_Direction == m_Direction_Last[i])
+			{
+				m_Direction_Timer[i] += g_Config.m_ClSubTickAiming/100.0f;
+				m_Direction_Timer[i] *= 1.1;
+				// printf("m_Direction_Timer %f\n", m_Direction_Timer[i]);
+				// m_Direction_Timer[i] *= 1.5;
+			}else
+			{
+				m_Direction_Timer[i] = 1;
+				m_Direction_Last[i] = pChar->m_Input.m_Direction;
+			}
+
+			pChar->m_Direction_Timer = m_Direction_Timer[i];
+			pChar->m_Direction_Last = m_Direction_Last[i];
+		}
+
 	// go through all the items in the snapshot and gather the info we want
 	{
 		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;

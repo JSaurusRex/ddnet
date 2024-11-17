@@ -288,11 +288,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		m_JumpedTotal = 0;
 	}
 
+	float accelFactor = powf(m_predictionDirectionMultiplier, 5);
 	// add the speed modification according to players wanted direction
 	if(m_Direction < 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
+		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel*accelFactor);
 	if(m_Direction > 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
+		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel*accelFactor);
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
 

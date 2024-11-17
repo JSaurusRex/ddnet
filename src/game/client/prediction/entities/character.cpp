@@ -575,6 +575,17 @@ void CCharacter::PreTick()
 {
 	DDRaceTick();
 
+	m_Direction_Timer--;
+	if(!m_IsLocal)
+	{
+		m_Core.m_predictionDirectionMultiplier = 1.0/clamp(10-m_Direction_Timer, 1.0f, 10.0f);
+		// m_Core.m_predictionDirectionMultiplier = 1;
+
+		if(m_Direction_Timer < 0)
+			m_Input.m_Direction = 0;
+	}else
+		m_Core.m_predictionDirectionMultiplier = 1;
+
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce);
 }

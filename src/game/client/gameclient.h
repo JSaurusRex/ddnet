@@ -306,6 +306,9 @@ public:
 	CCharacterCore m_PredictedPrevChar;
 	CCharacterCore m_PredictedChar;
 
+	int m_Direction_Last [MAX_CLIENTS] = {0};
+	float m_Direction_Timer [MAX_CLIENTS] = {0};
+
 	// snap pointers
 	struct CSnapState
 	{
