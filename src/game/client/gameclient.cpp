@@ -1546,7 +1546,7 @@ void CGameClient::OnNewSnapshot()
 			
 			if(pChar->m_Input.m_Direction == m_Direction_Last[i])
 			{
-				m_Direction_Timer[i] += g_Config.m_ClSubTickAiming/100.0f;
+				m_Direction_Timer[i] += g_Config.m_ClAntiPingDirectionFilter/100.0f;
 				m_Direction_Timer[i] *= 1.1;
 				// printf("m_Direction_Timer %f\n", m_Direction_Timer[i]);
 				// m_Direction_Timer[i] *= 1.5;
