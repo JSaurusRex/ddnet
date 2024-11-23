@@ -970,6 +970,9 @@ void CCharacter::StopRecording()
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
+	if(!GameServer()->ko_game)
+		return;
+	
 	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
@@ -996,6 +999,16 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	// this is to rate limit respawning to 3 secs
 	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
 	m_pPlayer->m_DieTick = Server()->Tick();
+	
+	
+	
+	if(Weapon != WEAPON_GAME)
+	{
+		m_pPlayer->m_player_eliminated = true;
+		str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(m_Core.m_Id));
+		GameServer()->SendBroadcast(aBuf, -1, true);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+	}
 
 	m_Alive = false;
 	SetSolo(false);

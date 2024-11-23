@@ -42,6 +42,35 @@ void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
 	pSelf->MoveCharacter(pResult->m_ClientId, 0, Tiles);
 }
 
+void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	
+	int time = pResult->GetInteger(0)*pSelf->Server()->TickSpeed();
+	
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->PlayerExists(i))
+		{
+			continue;
+		}
+
+		if(pSelf->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+			continue;
+		
+		pSelf->m_apPlayers[i]->m_player_eliminated = false;
+		pSelf->m_apPlayers[i]->KillCharacter();
+	}
+
+	pSelf->ko_player_count = 99;
+	pSelf->ko_game = true;
+	pSelf->m_pController->DoWarmup(5);
+	pSelf->m_pController->m_Time = time;
+}
+
 void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

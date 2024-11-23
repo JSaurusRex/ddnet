@@ -60,7 +60,6 @@ protected:
 	int m_GameOverTick;
 	int m_SuddenDeath;
 
-	int m_Warmup;
 	int m_RoundCount;
 
 	int m_GameFlags;
@@ -68,7 +67,9 @@ protected:
 	bool m_ForceBalanced;
 
 public:
+	int m_Warmup;
 	const char *m_pGameType;
+	virtual void KO_Start() {};
 
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
@@ -118,6 +119,8 @@ public:
 
 	// game
 	void DoWarmup(int Seconds);
+	int m_Timer;
+	int m_Time;
 
 	void StartRound();
 	void EndRound();

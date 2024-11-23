@@ -28,6 +28,84 @@ CScore *CGameControllerDDRace::Score()
 	return GameServer()->Score();
 }
 
+void CGameControllerDDRace::KO_Start()
+{
+	bool finished = (GameServer()->ko_player_count <= 2);
+	// printf("ko start, %i   amount players %i\n", finished, GameServer()->ko_player_count);
+	if(finished)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->PlayerExists(i))
+				continue;
+			
+			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+				continue;
+
+			if(GameServer()->m_apPlayers[i]->m_player_eliminated)
+			{
+				continue;
+			}
+
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
+			GameServer()->SendBroadcast(aBuf, -1, true);
+		}
+		m_Warmup = 5 * Server()->TickSpeed();
+		GameServer()->ko_game = false;
+		return;
+	}
+	
+	GameServer()->ko_player_count = 0;
+	GameServer()->ko_players_finished = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!GameServer()->PlayerExists(i))
+			continue;
+		
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+			continue;
+				
+		if(GameServer()->GetPlayerChar(i))
+		{
+			GameServer()->m_apPlayers[i]->KillCharacter();
+		}
+
+		if(GameServer()->m_apPlayers[i]->m_player_eliminated)
+		{
+			continue;
+		}
+
+		GameServer()->m_apPlayers[i]->TryRespawn();
+		
+		CCharacter * pChar = GameServer()->GetPlayerChar(i);
+
+		if(!pChar)
+			continue; //spawning failed
+		
+		GameServer()->ko_player_count++;
+		
+
+		pChar->SetSolo(true);
+		pChar->ResetPickups();
+
+		pChar->m_StartTime = Server()->Tick();
+		pChar->m_DDRaceState = DDRACE_STARTED;
+
+		pChar->m_LastTimeCp = -1;
+		pChar->m_LastTimeCpBroadcasted = -1;
+		for(float &CurrentTimeCp : pChar->m_aCurrentTimeCp)
+		{
+			CurrentTimeCp = 0.0f;
+		}
+	}
+
+	if(GameServer()->ko_player_count <= 1)
+		KO_Start();
+
+	m_Timer = m_Time;
+}
+
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();
@@ -91,6 +169,40 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// finish
 	if(((TileIndex == TILE_FINISH) || (TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
 		Teams().OnCharacterFinish(ClientId);
+	
+	if(((TileIndex == TILE_FINISH) || (TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && GameServer()->ko_game)
+	{
+		char aBuf[256];
+		GameServer()->ko_players_finished++;
+		if(GameServer()->ko_players_finished == GameServer()->ko_player_count)
+		{
+			pPlayer->m_player_eliminated = true;
+			str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(pPlayer->GetCid()));
+			GameServer()->SendBroadcast(aBuf, -1, true);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		}
+
+		pPlayer->KillCharacter(WEAPON_GAME);
+
+		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
+		{			
+			str_format(aBuf, sizeof(aBuf), "%s Wins!", Server()->ClientName(pPlayer->GetCid()));
+			GameServer()->SendBroadcast(aBuf, -1, true);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(!GameServer()->PlayerExists(i) || i == pPlayer->GetCid())
+				{
+					continue;
+				}
+				
+				GameServer()->m_apPlayers[i]->KillCharacter();
+			}
+
+			GameServer()->ko_game = false;
+		}
+	}
 
 	// unlock team
 	else if(((TileIndex == TILE_UNLOCK_TEAM) || (TileFIndex == TILE_UNLOCK_TEAM)) && Teams().TeamLocked(GameServer()->GetDDRaceTeam(ClientId)))
@@ -100,16 +212,16 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 
 	// solo part
-	if(((TileIndex == TILE_SOLO_ENABLE) || (TileFIndex == TILE_SOLO_ENABLE)) && !Teams().m_Core.GetSolo(ClientId))
-	{
-		GameServer()->SendChatTarget(ClientId, "You are now in a solo part");
-		pChr->SetSolo(true);
-	}
-	else if(((TileIndex == TILE_SOLO_DISABLE) || (TileFIndex == TILE_SOLO_DISABLE)) && Teams().m_Core.GetSolo(ClientId))
-	{
-		GameServer()->SendChatTarget(ClientId, "You are now out of the solo part");
-		pChr->SetSolo(false);
-	}
+	// if(((TileIndex == TILE_SOLO_ENABLE) || (TileFIndex == TILE_SOLO_ENABLE)) && !Teams().m_Core.GetSolo(ClientId))
+	// {
+	// 	GameServer()->SendChatTarget(ClientId, "You are now in a solo part");
+	// 	pChr->SetSolo(true);
+	// }
+	// else if(((TileIndex == TILE_SOLO_DISABLE) || (TileFIndex == TILE_SOLO_DISABLE)) && Teams().m_Core.GetSolo(ClientId))
+	// {
+	// 	GameServer()->SendChatTarget(ClientId, "You are now out of the solo part");
+	// 	pChr->SetSolo(false);
+	// }
 }
 
 void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacer, int Progress)
@@ -166,6 +278,49 @@ void CGameControllerDDRace::OnReset()
 
 void CGameControllerDDRace::Tick()
 {
+	if(m_Warmup <= 0 && GameServer()->ko_game)
+		m_Timer--;
+	
+	int playersIn = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!GameServer()->PlayerExists(i))
+			continue;
+
+		if(GameServer()->m_apPlayers[i]->m_player_eliminated || !GameServer()->m_apPlayers[i]->GetCharacter())
+		{
+			continue;
+		}
+
+		playersIn++;
+	}
+
+	// printf("m_Timer %i, playerysin %i, m_warmup %i\n", m_Timer, playersIn, m_Warmup);
+
+	if(playersIn < 1 && m_Warmup <= 0 && GameServer()->ko_game)
+	{
+		// printf("setting warmup %i\n", m_Warmup);
+		m_Warmup = 5*Server()->TickSpeed();
+		m_Timer = 1;
+	}
+	
+	if(m_Timer == 0 && GameServer()->ko_game)
+	{
+		//times up
+		GameServer()->SendChat(-1, TEAM_ALL, "Time is up");
+		GameServer()->SendBroadcast("Time is up!", -1);
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->PlayerExists(i) || !GameServer()->GetPlayerChar(i))
+				continue;
+			
+			GameServer()->m_apPlayers[i]->KillCharacter();
+		}
+
+		m_Timer = -1;
+	}
+
 	IGameController::Tick();
 	Teams().ProcessSaveTeam();
 	Teams().Tick();

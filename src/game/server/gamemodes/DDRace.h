@@ -18,6 +18,8 @@ public:
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 
+	void KO_Start() override;
+
 	void OnReset() override;
 
 	void Tick() override;

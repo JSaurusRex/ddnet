@@ -51,6 +51,7 @@ void CPlayer::Reset()
 	m_LastSetTeam = 0;
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
+	m_player_eliminated = true;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);
 	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)
@@ -241,7 +242,7 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning && !m_WeakHookSpawn)
+		else if(m_Spawning && !m_WeakHookSpawn && !GameServer()->ko_game && GameServer()->m_pController->m_Warmup <= 0)
 			TryRespawn();
 	}
 	else
@@ -301,8 +302,8 @@ void CPlayer::PostPostTick()
 	if(!Server()->ClientIngame(m_ClientId))
 		return;
 
-	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
-		TryRespawn();
+	// if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
+	// 	TryRespawn();
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -363,6 +364,12 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Local = (int)(m_ClientId == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
 		pPlayerInfo->m_ClientId = id;
 		pPlayerInfo->m_Team = m_Team;
+
+		if(m_ClientId == SnappingClient && !GameServer()->GetPlayerChar(SnappingClient))
+		{
+			pPlayerInfo->m_Team = TEAM_SPECTATORS;
+		}
+
 		if(SnappingClientVersion < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
 		{
 			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
@@ -386,7 +393,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = Latency;
 	}
 
-	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
+	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || !GameServer()->GetPlayerChar(SnappingClient)))
 	{
 		if(!Server()->IsSixup(SnappingClient))
 		{
@@ -686,7 +693,7 @@ void CPlayer::TryRespawn()
 
 	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, GameServer()->GetDDRaceTeam(m_ClientId)))
 		return;
-
+	
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientId) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientId));
@@ -694,8 +701,8 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientId));
 
-	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
-		m_pCharacter->SetSolo(true);
+	// if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	m_pCharacter->SetSolo(true);
 }
 
 void CPlayer::UpdatePlaytime()

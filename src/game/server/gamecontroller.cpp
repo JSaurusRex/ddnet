@@ -534,19 +534,19 @@ void IGameController::Tick()
 	if(m_Warmup)
 	{
 		m_Warmup--;
-		if(!m_Warmup)
-			StartRound();
+		if(!m_Warmup && GameServer()->ko_game)
+			KO_Start();
 	}
 
-	if(m_GameOverTick != -1)
-	{
-		// game over.. wait for restart
-		if(Server()->Tick() > m_GameOverTick + Server()->TickSpeed() * 10)
-		{
-			StartRound();
-			m_RoundCount++;
-		}
-	}
+	// if(m_GameOverTick != -1)
+	// {
+	// 	// game over.. wait for restart
+	// 	if(Server()->Tick() > m_GameOverTick + Server()->TickSpeed() * 10)
+	// 	{
+	// 		StartRound();
+	// 		m_RoundCount++;
+	// 	}
+	// }
 
 	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
 	{
@@ -594,7 +594,7 @@ void IGameController::Snap(int SnappingClient)
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorId != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorId]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused() || !pPlayer->GetCharacter()) && pPlayer->m_SpectatorId != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorId]))
 		{
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{

@@ -176,6 +176,9 @@ public:
 
 	void Clear();
 
+	bool ko_game = false;
+	int ko_player_count = 0;
+	int ko_players_finished = 0;
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
 	// keep last input to always apply when none is sent
@@ -413,6 +416,7 @@ private:
 	static void ConGoRight(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConKO_Start(IConsole::IResult *pResult, void *pUserData);
 	static void ConMove(IConsole::IResult *pResult, void *pUserData);
 	static void ConMoveRaw(IConsole::IResult *pResult, void *pUserData);
 

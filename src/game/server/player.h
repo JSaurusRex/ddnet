@@ -86,6 +86,7 @@ public:
 	int m_SpectatorId;
 
 	bool m_IsReady;
+	bool m_player_eliminated;
 
 	//
 	int m_Vote;
