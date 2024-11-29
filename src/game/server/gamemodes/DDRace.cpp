@@ -100,8 +100,21 @@ void CGameControllerDDRace::KO_Start()
 		}
 	}
 
+	printf("player count %i\n", GameServer()->ko_player_count);
+
 	if(GameServer()->ko_player_count <= 1)
 		KO_Start();
+	
+	GameServer()->ko_players_tobe_eliminated = 1;
+
+	if(GameServer()->ko_player_count > 20)
+		GameServer()->ko_players_tobe_eliminated = 8;
+	
+	if(GameServer()->ko_player_count > 10)
+		GameServer()->ko_players_tobe_eliminated = 4;
+	
+	if(GameServer()->ko_player_count > 4)
+		GameServer()->ko_players_tobe_eliminated = 2;
 
 	m_Timer = m_Time;
 }
@@ -284,7 +297,7 @@ void CGameControllerDDRace::Tick()
 	int playersIn = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!GameServer()->PlayerExists(i))
+		if(!GameServer()->PlayerExists(i) || GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 			continue;
 
 		if(GameServer()->m_apPlayers[i]->m_player_eliminated || !GameServer()->m_apPlayers[i]->GetCharacter())
@@ -295,13 +308,27 @@ void CGameControllerDDRace::Tick()
 		playersIn++;
 	}
 
-	// printf("m_Timer %i, playerysin %i, m_warmup %i\n", m_Timer, playersIn, m_Warmup);
-
-	if(playersIn < 1 && m_Warmup <= 0 && GameServer()->ko_game)
+	if(playersIn <= GameServer()->ko_players_tobe_eliminated && m_Warmup <= 0 && GameServer()->ko_game)
 	{
-		// printf("setting warmup %i\n", m_Warmup);
-		m_Warmup = 5*Server()->TickSpeed();
-		m_Timer = 1;
+		printf("everybody alive gets eliminated\n");
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->PlayerExists(i) || GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+				continue;
+
+			if(GameServer()->m_apPlayers[i]->m_player_eliminated || !GameServer()->m_apPlayers[i]->GetCharacter())
+			{
+				continue;
+			}
+
+			GameServer()->m_apPlayers[i]->m_player_eliminated = true;
+		}
+
+		if(playersIn < 1)
+		{
+			m_Warmup = 5*Server()->TickSpeed();
+			m_Timer = 1;
+		}
 	}
 	
 	if(m_Timer == 0 && GameServer()->ko_game)
@@ -312,9 +339,10 @@ void CGameControllerDDRace::Tick()
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!GameServer()->PlayerExists(i) || !GameServer()->GetPlayerChar(i))
+			if(!GameServer()->PlayerExists(i) || !GameServer()->GetPlayerChar(i) || GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 				continue;
 			
+			GameServer()->m_apPlayers[i]->m_player_eliminated = true;
 			GameServer()->m_apPlayers[i]->KillCharacter();
 		}
 
