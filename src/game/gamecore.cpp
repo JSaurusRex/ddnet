@@ -533,10 +533,10 @@ void CCharacterCore::TickDeferred()
 
 void CCharacterCore::Move()
 {
-	float RampValue = VelocityRamp(length(m_Vel) * 50,
+	float RampValue = VelocityRamp(length(m_Vel) * m_TickSpeed,
 		CWorldCore::PhysicsScalingLinear(m_Tuning.m_VelrampStart, m_TickSpeed),
 		CWorldCore::PhysicsScalingLinear(m_Tuning.m_VelrampRange, m_TickSpeed),
-		m_Tuning.m_VelrampCurvature);
+		CWorldCore::PhysicsScalingFriction(m_Tuning.m_VelrampCurvature, m_TickSpeed));
 
 	m_Vel.x = m_Vel.x * RampValue;
 
