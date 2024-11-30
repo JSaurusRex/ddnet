@@ -1011,7 +1011,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "You are eliminated!", Server()->ClientName(m_Core.m_Id));
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCid(), true);
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		// GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 
 	m_Alive = false;
@@ -1204,6 +1204,7 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 {
+	return true;
 	int Id = m_pPlayer->GetCid();
 
 	// A player may not be clipped away if his hook or a hook attached to him is in the field of view

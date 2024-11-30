@@ -88,6 +88,8 @@ void CGameControllerDDRace::KO_Start()
 
 		pChar->SetSolo(true);
 		pChar->ResetPickups();
+		pChar->ResetInput();
+		
 
 		pChar->m_StartTime = Server()->Tick();
 		pChar->m_DDRaceState = DDRACE_STARTED;
@@ -100,8 +102,6 @@ void CGameControllerDDRace::KO_Start()
 		}
 	}
 
-	printf("player count %i\n", GameServer()->ko_player_count);
-
 	if(GameServer()->ko_player_count <= 1)
 		KO_Start();
 	
@@ -113,7 +113,7 @@ void CGameControllerDDRace::KO_Start()
 	if(GameServer()->ko_player_count > 10)
 		GameServer()->ko_players_tobe_eliminated = 4;
 	
-	if(GameServer()->ko_player_count > 4)
+	if(GameServer()->ko_player_count > 5)
 		GameServer()->ko_players_tobe_eliminated = 2;
 
 	m_Timer = m_Time;

@@ -370,6 +370,11 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_Team = TEAM_SPECTATORS;
 		}
 
+		if(GameServer()->m_apPlayers[m_ClientId]->m_player_eliminated && !GameServer()->GetPlayerChar(m_ClientId))
+		{
+			pPlayerInfo->m_Team = TEAM_SPECTATORS;
+		}
+
 		if(SnappingClientVersion < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
 		{
 			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
