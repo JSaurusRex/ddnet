@@ -210,6 +210,9 @@ int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 			F->SetCarrier(0);
 			F->m_Vel = vec2(0, 0);
 
+			if(pKiller)
+				pKiller->IncrementScore();
+
 			HadFlag |= 1;
 		}
 		if(F && F->GetCarrier() == pVictim)
