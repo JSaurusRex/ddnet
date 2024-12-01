@@ -17,6 +17,22 @@ CGameControllerDM::~CGameControllerDM() = default;
 void CGameControllerDM::Tick()
 {
 	CGameControllerInstagib::Tick();
+
+	if(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60)
+	{
+		EndMatch();
+		return;
+	}
+
+	for(int i = 0; i < MAX_CLIENTS && m_GameInfo.m_ScoreLimit > 0; i++)
+	{
+		// check score win condition
+		if(GameServer()->GetPlayerChar(i) && GameServer()->m_apPlayers[i]->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit)
+		{
+			EndMatch();
+			return;
+		}
+	}
 }
 
 void CGameControllerDM::OnCharacterSpawn(class CCharacter *pChr)
@@ -37,14 +53,5 @@ bool CGameControllerDM::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, 
 
 int CGameControllerDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
-
-	// check score win condition
-	if((m_GameInfo.m_ScoreLimit > 0 && pKiller->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit) ||
-		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
-	{
-		EndMatch();
-		return true;
-	}
-	return false;
+	return CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 }
