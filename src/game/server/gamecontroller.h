@@ -294,6 +294,11 @@ protected:
 		if(m_GameState != IGS_END_MATCH)
 			OnEndMatchInsta();
 		SetGameState(IGS_END_MATCH, TIMER_END);
+		if(g_Config.m_SvTournamentChatRound > 0)
+		{
+			g_Config.m_SvTournamentChat = 0;
+			g_Config.m_SvTournamentChatRound = 0;
+		}
 	}
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); } // never called ddnet-insta has no round support yet
 

@@ -602,6 +602,11 @@ bool IGameController::CanBeMovedOnBalance(int ClientId)
 
 void IGameController::Tick()
 {
+	if(g_Config.m_SvTournamentChatRound > 0)
+	{
+		g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatRound;
+	}
+
 	// handle game states
 	if(m_GameState != IGS_GAME_RUNNING)
 	{
