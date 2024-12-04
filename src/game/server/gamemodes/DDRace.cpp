@@ -105,16 +105,16 @@ void CGameControllerDDRace::KO_Start()
 	if(GameServer()->ko_player_count <= 1)
 		KO_Start();
 	
-	GameServer()->ko_players_tobe_eliminated = 1;
+	GameServer()->ko_players_tobe_eliminated = g_Config.m_SvKoEliminations;
 
-	if(GameServer()->ko_player_count > 20)
-		GameServer()->ko_players_tobe_eliminated = 8;
+	// if(GameServer()->ko_player_count > 20)
+	// 	GameServer()->ko_players_tobe_eliminated = 8;
 	
-	if(GameServer()->ko_player_count > 10)
-		GameServer()->ko_players_tobe_eliminated = 4;
+	// if(GameServer()->ko_player_count > 10)
+	// 	GameServer()->ko_players_tobe_eliminated = 4;
 	
-	if(GameServer()->ko_player_count > 5)
-		GameServer()->ko_players_tobe_eliminated = 2;
+	// if(GameServer()->ko_player_count > 5)
+	// 	GameServer()->ko_players_tobe_eliminated = 2;
 
 	m_Timer = m_Time;
 }
@@ -190,9 +190,9 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 		if(GameServer()->ko_players_finished == GameServer()->ko_player_count)
 		{
 			pPlayer->m_player_eliminated = true;
-			str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(pPlayer->GetCid()));
-			GameServer()->SendBroadcast(aBuf, -1, true);
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			// str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(pPlayer->GetCid()));
+			// GameServer()->SendBroadcast(aBuf, -1, true);
+			// GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 
 		pPlayer->KillCharacter(WEAPON_GAME);
@@ -210,7 +210,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 					continue;
 				}
 				
-				GameServer()->m_apPlayers[i]->KillCharacter();
+				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
 			}
 
 			GameServer()->ko_game = false;
