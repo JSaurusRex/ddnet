@@ -591,6 +591,9 @@ const CCharacter *CPlayer::GetCharacter() const
 
 void CPlayer::KillCharacter(int Weapon, bool SendKillMsg)
 {
+	if(Weapon == WEAPON_SELF && GameServer()->ko_game)
+		return;
+	
 	if(m_pCharacter)
 	{
 		m_pCharacter->Die(m_ClientId, Weapon, SendKillMsg);
