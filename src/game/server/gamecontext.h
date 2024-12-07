@@ -177,6 +177,7 @@ public:
 	void Clear();
 
 	bool ko_game = false;
+	int ko_round = 0;
 	int ko_player_count = 0;
 	int ko_players_finished = 0;
 	int ko_players_tobe_eliminated = 0;

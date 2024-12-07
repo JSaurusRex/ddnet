@@ -52,6 +52,7 @@ void CPlayer::Reset()
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
 	m_player_eliminated = true;
+	m_ko_round = 0;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);
 	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)

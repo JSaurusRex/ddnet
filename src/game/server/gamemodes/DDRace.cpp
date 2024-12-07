@@ -31,7 +31,6 @@ CScore *CGameControllerDDRace::Score()
 void CGameControllerDDRace::KO_Start()
 {
 	bool finished = (GameServer()->ko_player_count <= 2);
-	// printf("ko start, %i   amount players %i\n", finished, GameServer()->ko_player_count);
 	if(finished)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -53,8 +52,14 @@ void CGameControllerDDRace::KO_Start()
 		}
 		m_Warmup = 5 * Server()->TickSpeed();
 		GameServer()->ko_game = false;
+		GameServer()->ko_round = 0;
 		return;
 	}
+
+	GameServer()->ko_round++;
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "starting round %i!", GameServer()->ko_round);
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	
 	GameServer()->ko_player_count = 0;
 	GameServer()->ko_players_finished = 0;
@@ -211,6 +216,12 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 				}
 				
 				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
+				if(GameServer()->m_apPlayers[i]->m_player_eliminated)
+				{
+					str_format(aBuf, sizeof(aBuf), "you survived until round %i!", GameServer()->m_apPlayers[i]->m_ko_round);
+					GameServer()->SendChatTarget(i, aBuf);
+					continue;
+				}
 			}
 
 			GameServer()->ko_game = false;
