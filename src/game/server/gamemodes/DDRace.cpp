@@ -41,12 +41,14 @@ void CGameControllerDDRace::KO_Start()
 			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 				continue;
 
+			char aBuf[256];
 			if(GameServer()->m_apPlayers[i]->m_player_eliminated)
 			{
+				str_format(aBuf, sizeof(aBuf), "you survived until round %i!", GameServer()->m_apPlayers[i]->m_ko_round);
+				GameServer()->SendChatTarget(i, aBuf);
 				continue;
 			}
 
-			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
 			GameServer()->SendBroadcast(aBuf, -1, true);
 		}
