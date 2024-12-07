@@ -67,7 +67,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->ko_player_count = 99;
 	pSelf->ko_game = true;
-	pSelf->m_pController->DoWarmup(5);
+	pSelf->m_pController->DoWarmup(10);
 	pSelf->m_pController->m_Time = time;
 }
 

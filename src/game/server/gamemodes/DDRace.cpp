@@ -50,7 +50,7 @@ void CGameControllerDDRace::KO_Start()
 			str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
 			GameServer()->SendBroadcast(aBuf, -1, true);
 		}
-		m_Warmup = 5 * Server()->TickSpeed();
+		m_Warmup = 10 * Server()->TickSpeed();
 		GameServer()->ko_game = false;
 		GameServer()->ko_round = 0;
 		return;
@@ -337,7 +337,7 @@ void CGameControllerDDRace::Tick()
 
 		if(playersIn < 1)
 		{
-			m_Warmup = 5*Server()->TickSpeed();
+			m_Warmup = 10 * Server()->TickSpeed();
 			m_Timer = 1;
 		}
 	}
