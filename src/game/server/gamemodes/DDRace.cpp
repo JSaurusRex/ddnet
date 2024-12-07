@@ -11,8 +11,8 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#define GAME_TYPE_NAME "DDraceNetwork"
-#define TEST_TYPE_NAME "TestDDraceNetwork"
+#define GAME_TYPE_NAME "COTD"
+#define TEST_TYPE_NAME "COTD"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
