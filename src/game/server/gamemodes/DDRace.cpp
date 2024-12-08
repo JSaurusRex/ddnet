@@ -305,7 +305,16 @@ void CGameControllerDDRace::OnReset()
 void CGameControllerDDRace::Tick()
 {
 	if(m_Warmup <= 0 && GameServer()->ko_game)
+	{
 		m_Timer--;
+		if(m_Timer < 10*Server()->TickSpeed() && m_Timer % Server()->TickSpeed() == 0)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%i", m_Timer/Server()->TickSpeed());
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			GameServer()->SendBroadcast(aBuf, -1);
+		}
+	}
 	
 	int playersIn = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
