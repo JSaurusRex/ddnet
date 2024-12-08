@@ -3656,6 +3656,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
 
 	Console()->Register("start_round", "i[seconds]", CFGFLAG_SERVER, ConKO_Start, this, "Starts round, time in seconds");
+	Console()->Register("restart_round", "", CFGFLAG_SERVER, ConKO_Restart, this, "restarts the round");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 

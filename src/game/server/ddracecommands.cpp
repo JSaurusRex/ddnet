@@ -71,6 +71,31 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->m_Time = time;
 }
 
+void CGameContext::ConKO_Restart(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->PlayerExists(i))
+		{
+			continue;
+		}
+
+		if(pSelf->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+			continue;
+		
+		pSelf->m_apPlayers[i]->KillCharacter(WEAPON_GAME);
+	}
+
+	// pSelf->ko_player_count = 99;
+	pSelf->ko_game = true;
+	pSelf->m_pController->DoWarmup(10);
+}
+
 void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

@@ -30,7 +30,7 @@ CScore *CGameControllerDDRace::Score()
 
 void CGameControllerDDRace::KO_Start()
 {
-	bool finished = (GameServer()->ko_player_count <= 2);
+	bool finished = (GameServer()->ko_player_count <= 1);
 	if(finished)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
