@@ -970,9 +970,6 @@ void CCharacter::StopRecording()
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
-	if(!GameServer()->ko_game)
-		return;
-	
 	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
@@ -1002,7 +999,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	
 	
 	
-	if(Weapon != WEAPON_GAME)
+	if(Weapon != WEAPON_GAME && GameServer()->ko_game)
 	{
 		m_pPlayer->m_player_eliminated = true;
 	}
