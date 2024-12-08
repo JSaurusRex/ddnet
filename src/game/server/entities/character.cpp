@@ -1202,7 +1202,10 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 {
-	return true;
+	if(GameServer()->PlayerExists(SnappingClientId) &&
+		(!GameServer()->m_apPlayers[SnappingClientId]->GetCharacter() || GameServer()->m_apPlayers[SnappingClientId]->GetTeam() == TEAM_SPECTATORS))
+		return true;
+	
 	int Id = m_pPlayer->GetCid();
 
 	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
