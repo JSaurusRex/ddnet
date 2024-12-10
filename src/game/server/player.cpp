@@ -294,8 +294,11 @@ void CPlayer::PostTick()
 	}
 
 	// update view pos for spectators
-	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorId] && GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter())
+	if((m_Team == TEAM_SPECTATORS || m_Paused || OutOfGame()) && m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorId] && GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter())
 		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter()->m_Pos;
+	
+	if(m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorId] && GameServer()->m_apPlayers[m_SpectatorId]->m_player_eliminated && !GameServer()->m_apPlayers[m_SpectatorId]->GetCharacter())
+		m_SpectatorId = SPEC_FREEVIEW;
 }
 
 void CPlayer::PostPostTick()
@@ -399,7 +402,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = Latency;
 	}
 
-	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || !GameServer()->GetPlayerChar(SnappingClient)))
+	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || GameServer()->m_apPlayers[SnappingClient]->OutOfGame()))
 	{
 		if(!Server()->IsSixup(SnappingClient))
 		{
@@ -580,6 +583,11 @@ CCharacter *CPlayer::GetCharacter()
 	if(m_pCharacter && m_pCharacter->IsAlive())
 		return m_pCharacter;
 	return 0;
+}
+
+bool CPlayer::OutOfGame()
+{
+	return !GetCharacter() && m_player_eliminated;
 }
 
 const CCharacter *CPlayer::GetCharacter() const
