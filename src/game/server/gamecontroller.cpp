@@ -583,6 +583,8 @@ void IGameController::Snap(int SnappingClient)
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
 	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
+	if(GameServer()->ko_game)
+		pGameInfoObj->m_RoundStartTick = Server()->Tick()-m_Timer;
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
 	pGameInfoObj->m_RoundNum = 0;
@@ -599,13 +601,13 @@ void IGameController::Snap(int SnappingClient)
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{
 				pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
-				pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
+				// pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 			}
 		}
 		else if((pChr = pPlayer->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 		{
 			pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
-			pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
+			// pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 		}
 	}
 
@@ -629,8 +631,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
 		GAMEINFOFLAG_ENTITIES_DDNET |
 		GAMEINFOFLAG_ENTITIES_DDRACE |
-		GAMEINFOFLAG_ENTITIES_RACE |
-		GAMEINFOFLAG_RACE;
+		GAMEINFOFLAG_ENTITIES_RACE;
+		// GAMEINFOFLAG_RACE;
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE;
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
