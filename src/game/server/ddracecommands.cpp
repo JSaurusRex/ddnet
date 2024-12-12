@@ -73,6 +73,16 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pController->m_Time = time;
 }
 
+void CGameContext::ConKO_Stop(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	
+	pSelf->m_pController->m_Timer = pResult->GetInteger(0)*pSelf->Server()->TickSpeed();;
+}
+
 void CGameContext::ConKO_Restart(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
