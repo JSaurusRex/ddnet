@@ -211,6 +211,13 @@ void CServer::CClient::Reset()
 	m_CurrentInput = 0;
 	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	{
+		m_aClientSlots[i].m_Server_ClientId = -1;
+		m_aClientSlots[i].m_Client_ClientId = i;
+		m_aClientClientIds[i] = -1;
+	}
+
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
@@ -219,6 +226,113 @@ void CServer::CClient::Reset()
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
+}
+
+void CServer::SetClientSlots(int ClientId)
+{
+	int ClientScores [MAX_CLIENTS] = {0};
+
+	ClientScores[ClientId] = 999;
+	//calculate score for each client
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		//todo: calculate client score
+		if(!GameServer()->PlayerExists(i))
+		{
+			continue;
+		}
+		
+		ClientScores[i]++;
+
+		if(GameServer()->IsClientPlayer(i))
+			ClientScores[i]++;
+		
+		// ClientScores[i]	+= i; //for testing prefer newer clients
+
+		ClientScores[i] += GameServer()->GiveClientClientScore(ClientId, i);
+		
+		//add if client already known to client
+		for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+		{
+			if(m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId == i)
+			{
+				ClientScores[i]++;
+				break;
+			}
+		}
+	}
+
+	//make array of top n Clients
+	int newSlots [MAX_CLIENTS_PER_CLIENT] = {-1};
+	memset(newSlots, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
+	int AlreadyThere [MAX_CLIENTS] = {-1};
+	memset(AlreadyThere, -1, MAX_CLIENTS*sizeof(int));
+	int AlreadyThere2 [MAX_CLIENTS_PER_CLIENT] = {-1};
+	memset(AlreadyThere2, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
+
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	{
+		//find highest score client and add it
+		int highest = 0;
+		int highestId = -1;
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			// non connected clients have a score of 0, so at least go beyond that score
+			if(ClientScores[j] > highest)
+			{
+				highest = ClientScores[j];
+				highestId = j;
+			}
+		}
+
+		if(highestId == -1)
+			break;
+		
+		ClientScores[highestId] = -1;
+		newSlots[i] = highestId;
+
+		//check if its already there
+		for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+		{
+			if(highestId == m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId)
+			{
+				AlreadyThere[m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId] = j;
+				AlreadyThere2[j] = m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId;
+				break;
+			}
+		}
+	}
+
+	//replace client slots
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT && newSlots[i] != -1; i++)
+	{
+		if(AlreadyThere[newSlots[i]] != -1)
+		{
+			//character is already there
+
+			//todo: maybe something?
+		}else
+		{
+			//find first empty slot
+			for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+			{
+				if(AlreadyThere2[j] == -1)
+				{
+					//found empty spot
+					AlreadyThere2[j] = newSlots[i];
+					AlreadyThere[newSlots[i]] = j;
+					m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId = newSlots[i];
+					break;
+				}
+			}
+		}
+	}
+
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	{
+		m_aClients[ClientId].m_aClientClientIds[i] = m_aClients[ClientId].m_aClientSlots[i].m_Server_ClientId;
+	}
+
 }
 
 CServer::CServer()
@@ -619,6 +733,14 @@ void CServer::GetClientAddr(int ClientId, char *pAddrStr, int Size) const
 		net_addr_str(m_NetServer.ClientAddr(ClientId), pAddrStr, Size, false);
 }
 
+int * CServer::GetClientsClients(int ClientId) const
+{
+	if(!ClientIngame(ClientId))
+		return 0;
+	
+	return (int *) m_aClients[ClientId].m_aClientClientIds;
+}
+
 const char *CServer::ClientName(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
@@ -916,6 +1038,7 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
+			SetClientSlots(i);
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
 
 			GameServer()->OnSnap(i);

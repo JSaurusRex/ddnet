@@ -40,6 +40,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Reset()
 {
+	m_LastChatTick = 0;
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_JoinTick = Server()->Tick();

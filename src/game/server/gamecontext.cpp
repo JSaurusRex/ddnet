@@ -259,6 +259,36 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 	}
 }
 
+int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
+{
+	if(!PlayerExists(ClientId))
+		return -1;
+	
+	int score = 0;
+	CPlayer * pPlayer = m_apPlayers[ClientId];
+
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+		score += 1;
+	
+	if(pPlayer->GetCharacter())
+	{
+		score += 1;
+		if(pPlayer->GetCharacter()->IsSnappingCharacterInView(SnappingClient))
+			score += 5;
+	}
+
+	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
+		score += 3;
+	
+	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
+		score += 1;
+	
+	if(pPlayer->m_LastActionTick > Server()->Tick()-Server()->TickSpeed()*15)	//hyper activity is good
+		score += 2;
+	
+	return score;
+}
+
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMask Mask)
 {
 	float a = 3 * pi / 2 + Angle;
@@ -2203,6 +2233,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	else
 	{
 		pPlayer->UpdatePlaytime();
+		pPlayer->m_LastChatTick = Server()->Tick();
 		char aCensoredMessage[256];
 		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 		SendChat(ClientId, Team, aCensoredMessage, ClientId);
@@ -4340,6 +4371,9 @@ void CGameContext::LoadMapSettings()
 
 void CGameContext::OnSnap(int ClientId)
 {
+	if(ClientId == -1)
+		return; //what in the hell is this
+	
 	// add tuning to demo
 	CTuningParams StandardTuning;
 	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)

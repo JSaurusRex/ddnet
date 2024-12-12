@@ -62,6 +62,7 @@ public:
 	virtual bool GetClientInfo(int ClientId, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientId, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientId, char *pAddrStr, int Size) const = 0;
+	virtual int * GetClientsClients(int ClientId) const = 0;
 
 	/**
 	 * Returns the version of the client with the given client ID.
@@ -189,11 +190,23 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
-			return true;
-		int *pMap = GetIdMap(Client);
+		
+		int *pMap;
 		bool Found = false;
-		for(int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		int amount = VANILLA_MAX_CLIENTS;
+
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)	//ddnet clients
+		{
+			// return true;
+			amount = MAX_CLIENTS_PER_CLIENT;
+			pMap = GetClientsClients(Client);
+		}
+		else
+		{
+			pMap = GetIdMap(Client);
+		}
+
+		for(int i = 0; i < amount; i++)
 		{
 			if(Target == pMap[i])
 			{
@@ -209,10 +222,21 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
-			return true;
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
+		
+		int amount = VANILLA_MAX_CLIENTS;
 		int *pMap = GetIdMap(Client);
+
+		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
+		{
+			// return true;
+			amount = MAX_CLIENTS_PER_CLIENT;
+			pMap = GetClientsClients(Client);
+
+			if(Target < 0 || Target >= amount)
+				return false;
+		}
+
+		Target = clamp(Target, 0, amount - 1);
 		if(pMap[Target] == -1)
 			return false;
 		Target = pMap[Target];
@@ -364,6 +388,8 @@ public:
 	virtual void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
+	virtual int GiveClientClientScore(int SnappingClient, int ClientId) const = 0;
 
 	/**
 	 * Used to report custom player info to master servers.
