@@ -62,9 +62,11 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 			continue;
 		
 		pSelf->m_apPlayers[i]->m_player_eliminated = false;
+		pSelf->m_apPlayers[i]->m_elimination = -1;
 		pSelf->m_apPlayers[i]->KillCharacter();
 	}
 
+	pSelf->ko_players_eliminated = 0;
 	pSelf->ko_player_count = 99;
 	pSelf->ko_game = true;
 	pSelf->m_pController->DoWarmup(10);

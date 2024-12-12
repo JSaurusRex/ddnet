@@ -919,20 +919,62 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
+	
+	if(pSelf->ko_game)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Game still in progress.");
+		
+		return;
+	}
 
+	int id = pResult->m_ClientId;
 	if(pResult->NumArguments() > 0)
 	{
 		if(!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowRank(pResult->m_ClientId, pResult->GetString(0));
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(!pSelf->Server()->ClientIngame(i))
+					continue;
+				
+				if(str_comp(pSelf->Server()->ClientName(i), pResult->GetString(0)) != 0)
+					continue;
+				
+				id = i;
+				break;
+			}
+		}
 		else
+		{
 			pSelf->Console()->Print(
 				IConsole::OUTPUT_LEVEL_STANDARD,
 				"chatresp",
 				"Showing the rank of other players is not allowed on this server.");
+
+			return;
+		}
 	}
-	else
-		pSelf->Score()->ShowRank(pResult->m_ClientId,
-			pSelf->Server()->ClientName(pResult->m_ClientId));
+
+	if(!pSelf->m_apPlayers[id])
+		return;
+
+	char aBuf[256];
+
+	int rank = pSelf->ko_players_eliminated - pSelf->m_apPlayers[id]->m_elimination + 2;
+	if(pSelf->m_apPlayers[id]->m_elimination == -2)
+		rank = 1;
+	
+	str_format(aBuf, sizeof(aBuf), "survived until round %i, placed %i", pSelf->m_apPlayers[id]->m_ko_round, rank);
+	if(pSelf->m_apPlayers[id]->m_elimination == -1)
+		str_format(aBuf, sizeof(aBuf), "didn't participate");
+	
+	pSelf->Console()->Print(
+		IConsole::OUTPUT_LEVEL_STANDARD,
+		"chatresp",
+		aBuf);
 }
 
 void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)

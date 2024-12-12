@@ -51,6 +51,8 @@ void CGameControllerDDRace::KO_Start()
 
 			str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
 			GameServer()->SendBroadcast(aBuf, -1, true);
+
+			GameServer()->m_apPlayers[i]->m_elimination = -2;
 		}
 		m_Warmup = 10 * Server()->TickSpeed();
 		GameServer()->ko_game = false;
@@ -207,6 +209,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
 		{			
 			str_format(aBuf, sizeof(aBuf), "%s Wins!", Server()->ClientName(pPlayer->GetCid()));
+			pPlayer->m_elimination = -2;
 			GameServer()->SendBroadcast(aBuf, -1, true);
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 

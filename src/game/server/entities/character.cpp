@@ -1010,6 +1010,8 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 		str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(m_Core.m_Id));
 		GameServer()->SendBroadcast("You are eliminated!", m_pPlayer->GetCid(), true);
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		GameServer()->ko_players_eliminated++;
+		m_pPlayer->m_elimination = GameServer()->ko_players_eliminated;
 	}
 
 	m_Alive = false;

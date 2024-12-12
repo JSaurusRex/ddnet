@@ -89,6 +89,7 @@ public:
 
 	bool m_IsReady;
 	bool m_player_eliminated;
+	int m_elimination;
 	int m_ko_round;
 
 	//
