@@ -91,6 +91,8 @@ public:
 	bool m_player_eliminated;
 	int m_elimination;
 	int m_ko_round;
+	int m_ko_round_timer;
+	int m_ko_fastest_round;
 
 	//
 	int m_Vote;

@@ -55,6 +55,7 @@ void CPlayer::Reset()
 	m_player_eliminated = true;
 	m_ko_round = 0;
 	m_elimination = -1;
+	m_ko_fastest_round = -1;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);
 	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)
@@ -624,6 +625,7 @@ void CPlayer::Respawn(bool WeakHook)
 
 CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 {
+	m_ko_round_timer = 0;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientId) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientId));
 	m_pCharacter->Spawn(this, Pos);

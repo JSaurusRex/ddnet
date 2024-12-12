@@ -194,14 +194,18 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	
 	if(((TileIndex == TILE_FINISH) || (TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && GameServer()->ko_game)
 	{
+
+		if(pChr->GetPlayer()->m_ko_fastest_round == -1)
+			pChr->GetPlayer()->m_ko_fastest_round = pChr->GetPlayer()->m_ko_round_timer;
+		else
+			if(pChr->GetPlayer()->m_ko_fastest_round > pChr->GetPlayer()->m_ko_round_timer)
+				pChr->GetPlayer()->m_ko_fastest_round = pChr->GetPlayer()->m_ko_round_timer;
+
 		char aBuf[256];
 		GameServer()->ko_players_finished++;
 		if(GameServer()->ko_players_finished == GameServer()->ko_player_count)
 		{
 			pPlayer->m_player_eliminated = true;
-			// str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(pPlayer->GetCid()));
-			// GameServer()->SendBroadcast(aBuf, -1, true);
-			// GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 
 		pPlayer->KillCharacter(WEAPON_GAME);
@@ -234,11 +238,11 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 
 	// unlock team
-	else if(((TileIndex == TILE_UNLOCK_TEAM) || (TileFIndex == TILE_UNLOCK_TEAM)) && Teams().TeamLocked(GameServer()->GetDDRaceTeam(ClientId)))
-	{
-		Teams().SetTeamLock(GameServer()->GetDDRaceTeam(ClientId), false);
-		GameServer()->SendChatTeam(GameServer()->GetDDRaceTeam(ClientId), "Your team was unlocked by an unlock team tile");
-	}
+	// else if(((TileIndex == TILE_UNLOCK_TEAM) || (TileFIndex == TILE_UNLOCK_TEAM)) && Teams().TeamLocked(GameServer()->GetDDRaceTeam(ClientId)))
+	// {
+	// 	Teams().SetTeamLock(GameServer()->GetDDRaceTeam(ClientId), false);
+	// 	GameServer()->SendChatTeam(GameServer()->GetDDRaceTeam(ClientId), "Your team was unlocked by an unlock team tile");
+	// }
 
 	// solo part
 	// if(((TileIndex == TILE_SOLO_ENABLE) || (TileFIndex == TILE_SOLO_ENABLE)) && !Teams().m_Core.GetSolo(ClientId))

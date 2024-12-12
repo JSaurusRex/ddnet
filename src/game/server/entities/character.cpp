@@ -793,6 +793,8 @@ void CCharacter::Tick()
 		Antibot()->OnHookAttach(m_pPlayer->GetCid(), false);
 	}
 
+	m_pPlayer->m_ko_round_timer++;
+
 	// handle Weapons
 	HandleWeapons();
 

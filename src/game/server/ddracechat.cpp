@@ -967,7 +967,9 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->m_apPlayers[id]->m_elimination == -2)
 		rank = 1;
 	
-	str_format(aBuf, sizeof(aBuf), "survived until round %i, placed %i", pSelf->m_apPlayers[id]->m_ko_round, rank);
+	str_format(aBuf, sizeof(aBuf), "survived until round %i, placed %i  -  Best Time %.2f Sec", pSelf->m_apPlayers[id]->m_ko_round, rank,
+		pSelf->m_apPlayers[id]->m_ko_fastest_round/(float)pSelf->Server()->TickSpeed());
+	
 	if(pSelf->m_apPlayers[id]->m_elimination == -1)
 		str_format(aBuf, sizeof(aBuf), "didn't participate");
 	
