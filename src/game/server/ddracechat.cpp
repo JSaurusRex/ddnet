@@ -79,13 +79,13 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"DDNet-insta by ChillerDragon");
+		"DDNet-Vanilla by JSaurusRex");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"https://github.com/ZillyInsta/ddnet-insta/");
+		"");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"based on:");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"DDraceNetwork Mod. Version: " GAME_VERSION);
+		"ChillerDragons: https://github.com/ZillyInsta/ddnet-insta/");
 	if(GIT_SHORTREV_HASH)
 	{
 		char aBuf[64];
