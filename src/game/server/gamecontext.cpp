@@ -278,7 +278,7 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 	}
 
 	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
-		score += 3;
+		score += 15;
 	
 	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
 		score += 1;
