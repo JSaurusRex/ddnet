@@ -198,7 +198,9 @@ public:
 
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)	//ddnet clients
 		{
-			// return true;
+			if(!CanMap())
+				return true;
+			
 			amount = MAX_CLIENTS_PER_CLIENT;
 			pMap = GetClientsClients(Client);
 
@@ -237,7 +239,9 @@ public:
 
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 		{
-			// return true;
+			if(!CanMap())
+				return true;
+			
 			amount = MAX_CLIENTS_PER_CLIENT;
 			pMap = GetClientsClients(Client);
 
@@ -324,6 +328,7 @@ public:
 	virtual const char *GetMapName() const = 0;
 
 	virtual bool IsSixup(int ClientId) const = 0;
+	virtual bool CanMap() const = 0;
 };
 
 class IGameServer : public IInterface

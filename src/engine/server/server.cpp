@@ -1044,6 +1044,7 @@ void CServer::SendMsgRaw(int ClientId, const void *pData, int Size, int Flags)
 
 void CServer::DoSnapshot()
 {
+	m_MapClients = g_Config.m_SvClientMapping;
 	GameServer()->OnPreSnap();
 
 	if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording() || m_aDemoRecorder[RECORDER_AUTO].IsRecording())
@@ -1081,7 +1082,7 @@ void CServer::DoSnapshot()
 		{
 			// m_aClients[i].m_aClientClientIds[0] = i;
 			// m_aClients[i].m_aClientSlots[0].m_Server_ClientId = i;
-			if(i % 7 == Tick() % 7)
+			if(i % 7 == Tick() % 7 && g_Config.m_SvClientMapping)
 				SetClientSlots(i);
 			
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
