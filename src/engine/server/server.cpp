@@ -213,9 +213,8 @@ void CServer::CClient::Reset()
 
 	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
 	{
-		m_aClientSlots[i].m_Server_ClientId = -1;
-		m_aClientSlots[i].m_Client_ClientId = i;
 		m_aClientClientIds[i] = -1;
+		m_aServerClientIds[i] = -1;
 	}
 
 	m_Snapshots.PurgeAll();
@@ -250,6 +249,11 @@ void CServer::SetClientSlots(int ClientId)
 		// ClientScores[i]	+= i; //for testing prefer newer clients
 
 		ClientScores[i] += GameServer()->GiveClientClientScore(ClientId, i);
+
+		if(m_aClients[ClientId].m_aServerClientIds[i] != -1)
+		{
+			ClientScores[i]++;
+		}
 		
 		//add if client already known to client
 		// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
@@ -291,13 +295,20 @@ void CServer::SetClientSlots(int ClientId)
 		ClientScores[highestId] = -1;
 		newSlots[i] = highestId;
 
+
+		// if(m_aClients[ClientId].m_aServerClientIds[highestId] != -1)
+		// {
+		// 	AlreadyThere[m_aClients[ClientId].m_aClientClientIds[highestId]] = highestId;
+		// 	AlreadyThere2[highestId] = m_aClients[ClientId].m_aClientClientIds[highestId];
+		// }
+
 		//check if its already there
 		for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
 		{
-			if(highestId == m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId)
+			if(highestId == m_aClients[ClientId].m_aClientClientIds[j])
 			{
-				AlreadyThere[m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId] = j;
-				AlreadyThere2[j] = m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId;
+				AlreadyThere[m_aClients[ClientId].m_aClientClientIds[j]] = j;
+				AlreadyThere2[j] = m_aClients[ClientId].m_aClientClientIds[j];
 				break;
 			}
 		}
@@ -329,7 +340,7 @@ void CServer::SetClientSlots(int ClientId)
 		{
 			//find first empty slot
 			AlreadyThere[newSlots[i]] = EmptySpots[IndexEmptySpots];
-			m_aClients[ClientId].m_aClientSlots[EmptySpots[IndexEmptySpots]].m_Server_ClientId = newSlots[i];
+			m_aClients[ClientId].m_aClientClientIds[EmptySpots[IndexEmptySpots]] = newSlots[i];
 			IndexEmptySpots++;
 
 			// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
@@ -346,11 +357,15 @@ void CServer::SetClientSlots(int ClientId)
 		}
 	}
 
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_aClients[ClientId].m_aClientClientIds[i] = m_aClients[ClientId].m_aClientSlots[i].m_Server_ClientId;
+		m_aClients[ClientId].m_aServerClientIds[i] = -1;
 	}
 
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	{
+		m_aClients[ClientId].m_aServerClientIds[m_aClients[ClientId].m_aClientClientIds[i]] = i;
+	}
 }
 
 CServer::CServer()
@@ -757,6 +772,14 @@ int * CServer::GetClientsClients(int ClientId) const
 		return 0;
 	
 	return (int *) m_aClients[ClientId].m_aClientClientIds;
+}
+
+int CServer::DoesClientHaveClient(int ClientId, int id2) const
+{
+	if(!ClientIngame(ClientId))
+		return 0;
+	
+	return m_aClients[ClientId].m_aServerClientIds[id2];
 }
 
 const char *CServer::ClientName(int ClientId) const

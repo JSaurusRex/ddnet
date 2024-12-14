@@ -63,6 +63,7 @@ public:
 	virtual void SetClientDDNetVersion(int ClientId, int DDNetVersion) = 0;
 	virtual void GetClientAddr(int ClientId, char *pAddrStr, int Size) const = 0;
 	virtual int * GetClientsClients(int ClientId) const = 0;
+	virtual int DoesClientHaveClient(int ClientId, int id2) const = 0;
 
 	/**
 	 * Returns the version of the client with the given client ID.
@@ -200,6 +201,14 @@ public:
 			// return true;
 			amount = MAX_CLIENTS_PER_CLIENT;
 			pMap = GetClientsClients(Client);
+
+			Target = DoesClientHaveClient(Client, Target);
+			if(Target == -1)
+				return false;
+			else
+			{
+				return true;
+			}
 		}
 		else
 		{

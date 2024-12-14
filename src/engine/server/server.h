@@ -151,16 +151,8 @@ public:
 		CInput m_aInputs[200]; // TODO: handle input better
 		int m_CurrentInput;
 
-		class CClientSlot
-		{
-		public:
-			int m_Server_ClientId;
-			int m_Client_ClientId;
-		};
-
-		CClientSlot m_aClientSlots[MAX_CLIENTS_PER_CLIENT];
-
 		int m_aClientClientIds[MAX_CLIENTS_PER_CLIENT];
+		int m_aServerClientIds[MAX_CLIENTS];
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
@@ -311,6 +303,7 @@ public:
 	void SetClientDDNetVersion(int ClientId, int DDNetVersion) override;
 	void GetClientAddr(int ClientId, char *pAddrStr, int Size) const override;
 	int * GetClientsClients(int ClientId) const override;
+	int DoesClientHaveClient(int ClientId, int id2) const override;
 	const char *ClientName(int ClientId) const override;
 	const char *ClientClan(int ClientId) const override;
 	int ClientCountry(int ClientId) const override;
