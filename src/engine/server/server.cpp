@@ -252,14 +252,14 @@ void CServer::SetClientSlots(int ClientId)
 		ClientScores[i] += GameServer()->GiveClientClientScore(ClientId, i);
 		
 		//add if client already known to client
-		for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
-		{
-			if(m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId == i)
-			{
-				ClientScores[i]++;
-				break;
-			}
-		}
+		// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+		// {
+		// 	if(m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId == i)
+		// 	{
+		// 		ClientScores[i]++;
+		// 		break;
+		// 	}
+		// }
 	}
 
 	//make array of top n Clients
