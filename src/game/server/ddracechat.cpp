@@ -971,7 +971,7 @@ void CGameContext::ConRank(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apPlayers[id]->m_ko_fastest_round/(float)pSelf->Server()->TickSpeed());
 	
 	if(pSelf->m_apPlayers[id]->m_elimination == -1)
-		str_format(aBuf, sizeof(aBuf), "didn't participate");
+		str_copy(aBuf, "didn't participate", sizeof(aBuf));
 	
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
