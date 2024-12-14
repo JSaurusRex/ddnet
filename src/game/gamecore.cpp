@@ -459,7 +459,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 void CCharacterCore::TickDeferred()
 {
-	if(m_pWorld)
+	if(m_pWorld && false)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -562,7 +562,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
+	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)) && false)
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);

@@ -303,6 +303,20 @@ void CServer::SetClientSlots(int ClientId)
 		}
 	}
 
+	int AmountEmptySpots = 0;
+	int EmptySpots [MAX_CLIENTS_PER_CLIENT] = {-1};
+	memset(EmptySpots, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	{
+		if(AlreadyThere2[i] == -1)
+		{
+			EmptySpots[AmountEmptySpots] = i;
+			AmountEmptySpots++;
+		}
+	}
+
+	int IndexEmptySpots = 0;
+
 	//replace client slots
 	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT && newSlots[i] != -1; i++)
 	{
@@ -314,17 +328,21 @@ void CServer::SetClientSlots(int ClientId)
 		}else
 		{
 			//find first empty slot
-			for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
-			{
-				if(AlreadyThere2[j] == -1)
-				{
-					//found empty spot
-					AlreadyThere2[j] = newSlots[i];
-					AlreadyThere[newSlots[i]] = j;
-					m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId = newSlots[i];
-					break;
-				}
-			}
+			AlreadyThere[newSlots[i]] = EmptySpots[IndexEmptySpots];
+			m_aClients[ClientId].m_aClientSlots[EmptySpots[IndexEmptySpots]].m_Server_ClientId = newSlots[i];
+			IndexEmptySpots++;
+
+			// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+			// {
+			// 	if(AlreadyThere2[j] == -1)
+			// 	{
+			// 		//found empty spot
+			// 		AlreadyThere2[j] = newSlots[i];
+			// 		AlreadyThere[newSlots[i]] = j;
+			// 		m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId = newSlots[i];
+			// 		break;
+			// 	}
+			// }
 		}
 	}
 
@@ -1038,7 +1056,11 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			SetClientSlots(i);
+			// m_aClients[i].m_aClientClientIds[0] = i;
+			// m_aClients[i].m_aClientSlots[0].m_Server_ClientId = i;
+			if(i % 7 == Tick() % 7)
+				SetClientSlots(i);
+			
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
 
 			GameServer()->OnSnap(i);
