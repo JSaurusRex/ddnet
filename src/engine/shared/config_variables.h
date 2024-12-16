@@ -652,6 +652,7 @@ MACRO_CONFIG_STR(SvClientSuggestionOld, sv_client_suggestion_old, 128, "Your DDN
 MACRO_CONFIG_STR(SvClientSuggestionBot, sv_client_suggestion_bot, 128, "Your client has bots and can be remotely controlled!\nPlease use another client like DDNet client from DDNet.org", CFGFLAG_SERVER, "Broadcast to display to players with a known botting client")
 MACRO_CONFIG_STR(SvBannedVersions, sv_banned_versions, 128, "", CFGFLAG_SERVER, "Comma separated list of banned clients to be kicked on join")
 MACRO_CONFIG_INT(SvKoEliminations, sv_ko_eliminations, 1, 1, 20, CFGFLAG_SERVER, "Amount of eliminations per round (KO GAME)")
+MACRO_CONFIG_INT(SvKoTimeLimit, sv_ko_time_limit, 20, 1, 99999, CFGFLAG_SERVER, "time limit of 1 round, applies next round (KO GAME)")
 
 // netlimit
 MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")

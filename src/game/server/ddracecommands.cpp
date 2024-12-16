@@ -49,7 +49,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 	
-	int time = pResult->GetInteger(0)*pSelf->Server()->TickSpeed();
+	int time = pResult->GetInteger(0);
 	
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -70,7 +70,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ko_player_count = 99;
 	pSelf->ko_game = true;
 	pSelf->m_pController->DoWarmup(10);
-	pSelf->m_pController->m_Time = time;
+	g_Config.m_SvKoTimeLimit = time;
 }
 
 void CGameContext::ConKO_Stop(IConsole::IResult *pResult, void *pUserData)
@@ -80,7 +80,7 @@ void CGameContext::ConKO_Stop(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 	
-	pSelf->m_pController->m_Timer = pResult->GetInteger(0)*pSelf->Server()->TickSpeed();;
+	pSelf->m_pController->m_Timer = pResult->GetInteger(0)*pSelf->Server()->TickSpeed();
 }
 
 void CGameContext::ConKO_Restart(IConsole::IResult *pResult, void *pUserData)

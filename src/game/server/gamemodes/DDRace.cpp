@@ -125,7 +125,7 @@ void CGameControllerDDRace::KO_Start()
 	// if(GameServer()->ko_player_count > 5)
 	// 	GameServer()->ko_players_tobe_eliminated = 2;
 
-	m_Timer = m_Time;
+	m_Timer = g_Config.m_SvKoTimeLimit*Server()->TickSpeed();
 }
 
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
