@@ -653,6 +653,7 @@ MACRO_CONFIG_STR(SvClientSuggestionBot, sv_client_suggestion_bot, 128, "Your cli
 MACRO_CONFIG_STR(SvBannedVersions, sv_banned_versions, 128, "", CFGFLAG_SERVER, "Comma separated list of banned clients to be kicked on join")
 MACRO_CONFIG_INT(SvKoEliminations, sv_ko_eliminations, 1, 1, 20, CFGFLAG_SERVER, "Amount of eliminations per round (KO GAME)")
 MACRO_CONFIG_INT(SvKoTimeLimit, sv_ko_time_limit, 20, 1, 99999, CFGFLAG_SERVER, "time limit of 1 round, applies next round (KO GAME)")
+MACRO_CONFIG_INT(SvKoPublicChat, sv_ko_public_chat, 0, 0, 1, CFGFLAG_SERVER, "make players able to publicly chat during the game (KO GAME)")
 
 // netlimit
 MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")

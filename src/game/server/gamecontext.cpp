@@ -667,7 +667,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Team != TEAM_ALL ? "teamchat" : "chat", aBuf);
 
-	if(Team == TEAM_ALL)
+	if(ChatterClientId < 0 || (Team == TEAM_ALL && (!ko_game || Server()->ClientAuthed(ChatterClientId) || !m_apPlayers[ChatterClientId]->m_player_eliminated || g_Config.m_SvKoPublicChat)))
 	{
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 0;
@@ -704,13 +704,15 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 		// pack one for the recording only
 		if(g_Config.m_SvDemoChat)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
+		
+		bool eliminated = m_apPlayers[ChatterClientId]->OutOfGame();
 
 		// send to the clients
 		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
 			if(m_apPlayers[i] != 0)
 			{
-				if(Team == TEAM_SPECTATORS)
+				if(Team == TEAM_SPECTATORS && !ko_game)
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 					{
@@ -719,7 +721,7 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				}
 				else
 				{
-					if(pTeams->Team(i) == Team && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+					if(eliminated == m_apPlayers[i]->OutOfGame())
 					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
