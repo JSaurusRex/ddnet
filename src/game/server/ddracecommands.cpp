@@ -68,6 +68,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->ko_players_eliminated = 0;
 	pSelf->ko_player_count = 99;
+	pSelf->ko_round = 0;
 	pSelf->ko_game = true;
 	pSelf->m_pController->DoWarmup(10);
 	g_Config.m_SvKoTimeLimit = time;
