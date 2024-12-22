@@ -1820,7 +1820,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			// skip packets that are old
 			if(IntendedTick > m_aClients[ClientId].m_LastInputTick)
 			{
-				const int TimeLeft = (TickStartTime(IntendedTick) - time_get()) / (time_freq() / 1000);
+				int TimeLeft = (TickStartTime(IntendedTick) - time_get()) / (time_freq() / 1000);
+
+				const int TimeLeft2 = (TickStartTime(LastAckedSnapshot) - time_get()) / (time_freq() / 1000);
+
+
+				if(g_Config.m_SvForcePredictionMargin)
+					TimeLeft = TimeLeft - (TimeLeft2 + g_Config.m_SvForcePredictionMargin);
 
 				CMsgPacker Msgp(NETMSG_INPUTTIMING, true);
 				Msgp.AddInt(IntendedTick);
