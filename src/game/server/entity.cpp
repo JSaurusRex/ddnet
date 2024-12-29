@@ -102,8 +102,8 @@ bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 Ch
 
 bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos)
 {
-	// if(SnappingClient == SERVER_DEMO_CLIENT || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
-	// 	return false;
+	if(SnappingClient == SERVER_DEMO_CLIENT || pGameServer->m_apPlayers[SnappingClient]->m_ShowAll)
+		return false;
 
 	vec2 &ViewPos = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos;
 	vec2 &ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance;

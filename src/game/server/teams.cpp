@@ -526,8 +526,8 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 		if(!((Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIXUP)) ||
 			   (!Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIX))))
 			continue;
-
-		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
+		
+		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || !GetPlayer(i)->GetCharacter() || GetPlayer(i)->IsPaused()))
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players
@@ -555,29 +555,29 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 			{ // Actions of other players
 				if(!Character(GetPlayer(i)->m_SpectatorId))
 					continue; // Player is currently dead
-				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
-				{
-					if(m_Core.Team(GetPlayer(i)->m_SpectatorId) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorId) != TEAM_SUPER)
-						continue; // In different teams
-				}
-				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
-				{
-					if(m_Core.GetSolo(Asker))
-						continue; // When in solo part don't show others
-					if(m_Core.GetSolo(GetPlayer(i)->m_SpectatorId))
-						continue; // When in solo part don't show others
-					if(m_Core.Team(GetPlayer(i)->m_SpectatorId) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorId) != TEAM_SUPER)
-						continue; // In different teams
-				}
+				// if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+				// {
+				// 	if(m_Core.Team(GetPlayer(i)->m_SpectatorId) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorId) != TEAM_SUPER)
+				// 		continue; // In different teams
+				// }
+				// else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
+				// {
+				// 	if(m_Core.GetSolo(Asker))
+				// 		continue; // When in solo part don't show others
+				// 	if(m_Core.GetSolo(GetPlayer(i)->m_SpectatorId))
+				// 		continue; // When in solo part don't show others
+				// 	if(m_Core.Team(GetPlayer(i)->m_SpectatorId) != Team && m_Core.Team(GetPlayer(i)->m_SpectatorId) != TEAM_SUPER)
+				// 		continue; // In different teams
+				// }
 			} // See everything of player you're spectating
 		}
 		else
 		{ // Freeview
-			if(GetPlayer(i)->m_SpecTeam)
-			{ // Show only players in own team when spectating
-				if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
-					continue; // in different teams
-			}
+			// if(GetPlayer(i)->m_SpecTeam)
+			// { // Show only players in own team when spectating
+			// 	if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+			// 		continue; // in different teams
+			// }
 		}
 
 		Mask.set(i);
