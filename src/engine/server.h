@@ -208,9 +208,7 @@ public:
 			if(Target == -1)
 				return false;
 			else
-			{
 				return true;
-			}
 		}
 		else
 		{

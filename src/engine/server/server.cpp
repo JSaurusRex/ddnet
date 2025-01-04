@@ -254,16 +254,9 @@ void CServer::SetClientSlots(int ClientId)
 		{
 			ClientScores[i]++;
 		}
-		
-		//add if client already known to client
-		// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
-		// {
-		// 	if(m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId == i)
-		// 	{
-		// 		ClientScores[i]++;
-		// 		break;
-		// 	}
-		// }
+
+		if(i == ClientId)
+			ClientScores[i] += 999;
 	}
 
 	//make array of top n Clients
@@ -777,7 +770,7 @@ int * CServer::GetClientsClients(int ClientId) const
 int CServer::DoesClientHaveClient(int ClientId, int id2) const
 {
 	if(!ClientIngame(ClientId))
-		return 0;
+		return -1;
 	
 	return m_aClients[ClientId].m_aServerClientIds[id2];
 }
@@ -1080,8 +1073,6 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			// m_aClients[i].m_aClientClientIds[0] = i;
-			// m_aClients[i].m_aClientSlots[0].m_Server_ClientId = i;
 			if(i % 7 == Tick() % 7 && g_Config.m_SvClientMapping)
 				SetClientSlots(i);
 			

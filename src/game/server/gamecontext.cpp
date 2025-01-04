@@ -278,10 +278,10 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 	}
 
 	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
-		score += 15;
+		score += 7;
 	
 	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
-		score += 1;
+		score += 3;
 	
 	if(pPlayer->m_LastActionTick > Server()->Tick()-Server()->TickSpeed()*15)	//hyper activity is good
 		score += 2;
@@ -687,7 +687,24 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				    (!Server()->IsSixup(i) && (VersionFlags & FLAG_SIX));
 
 			if(!m_apPlayers[i]->m_DND && Send)
+			{
+				char bBuf[256];
+				int id = ChatterClientId;
+				str_copy(bBuf, aText, sizeof(aText));
+				Msg.m_ClientId = ChatterClientId;
+
+				if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
+				{
+					if(!Server()->Translate(id, i) && ChatterClientId != i)
+					{
+						Msg.m_ClientId = -1;
+						str_format(bBuf, sizeof(bBuf), "%s: %s", Server()->ClientName(ChatterClientId), aText);
+					}
+				}
+				Msg.m_pMessage = bBuf;
+
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+			}
 		}
 
 		str_format(aBuf, sizeof(aBuf), "Chat: %s", aText);
@@ -712,6 +729,20 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 		{
 			if(m_apPlayers[i] != 0)
 			{
+				char bBuf[256];
+				int id = ChatterClientId;
+				Msg.m_ClientId = ChatterClientId;
+				if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
+				{
+					str_copy(bBuf, aText, sizeof(aText));
+					if(!Server()->Translate(id, i) && ChatterClientId != i)
+					{
+						Msg.m_ClientId = -1;
+						str_format(bBuf, sizeof(bBuf), "%s: %s", Server()->ClientName(ChatterClientId), aText);
+					}
+				}
+				Msg.m_pMessage = bBuf;
+
 				if(Team == TEAM_SPECTATORS && !ko_game)
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
