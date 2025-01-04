@@ -289,22 +289,22 @@ void CServer::SetClientSlots(int ClientId)
 		newSlots[i] = highestId;
 
 
-		// if(m_aClients[ClientId].m_aServerClientIds[highestId] != -1)
-		// {
-		// 	AlreadyThere[m_aClients[ClientId].m_aClientClientIds[highestId]] = highestId;
-		// 	AlreadyThere2[highestId] = m_aClients[ClientId].m_aClientClientIds[highestId];
-		// }
+		if(m_aClients[ClientId].m_aServerClientIds[highestId] != -1)
+		{
+			AlreadyThere[highestId] = m_aClients[ClientId].m_aServerClientIds[highestId];
+			AlreadyThere2[AlreadyThere[highestId]] = m_aClients[ClientId].m_aClientClientIds[highestId];
+		}
 
 		//check if its already there
-		for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
-		{
-			if(highestId == m_aClients[ClientId].m_aClientClientIds[j])
-			{
-				AlreadyThere[m_aClients[ClientId].m_aClientClientIds[j]] = j;
-				AlreadyThere2[j] = m_aClients[ClientId].m_aClientClientIds[j];
-				break;
-			}
-		}
+		// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
+		// {
+		// 	if(highestId == m_aClients[ClientId].m_aClientClientIds[j])
+		// 	{
+		// 		AlreadyThere[m_aClients[ClientId].m_aClientClientIds[j]] = j;
+		// 		AlreadyThere2[j] = m_aClients[ClientId].m_aClientClientIds[j];
+		// 		break;
+		// 	}
+		// }
 	}
 
 	int AmountEmptySpots = 0;
