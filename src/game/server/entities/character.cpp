@@ -2443,7 +2443,7 @@ void CCharacter::Rescue()
 
 CClientMask CCharacter::TeamMask(bool isSound)
 {
-	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCid(), isSound);
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCid());
 }
 
 void CCharacter::SetPosition(const vec2 &Position)

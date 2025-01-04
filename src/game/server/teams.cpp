@@ -582,10 +582,10 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 			// }
 		}
 
-		if(IsSound && Asker >= 0 && Asker != i && g_Config.m_SvLimitSounds)
+		if(IsSound && Asker >= 0 && Asker != i && g_Config.m_SvLimitSounds && false)
 		{
-			m_NumSounds[Asker]++;
-			if(m_NumSounds[Asker] > g_Config.m_SvLimitSounds)
+			m_NumSounds[i]++;
+			if(m_NumSounds[i] > g_Config.m_SvLimitSounds)
 				continue;
 		}
 

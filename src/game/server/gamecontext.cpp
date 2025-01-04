@@ -278,7 +278,7 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 	}
 
 	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
-		score += 7;
+		score += 15;
 	
 	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
 		score += 3;
@@ -647,6 +647,35 @@ void CGameContext::SendChatTeam(int Team, const char *pText) const
 			SendChatTarget(i, pText);
 }
 
+void CGameContext::SaveChat(CNetMsg_Sv_Chat msg, int ClientId)
+{
+	if(!m_apPlayers[ClientId])
+		return;
+	
+	int index = amount_chats[ClientId];
+	str_copy(saved_chats_messages[ClientId][index], msg.m_pMessage, sizeof(char)*256);
+	msg.m_pMessage = saved_chats_messages[ClientId][index];
+	saved_chats[ClientId][index] = msg;
+	chat_ticks[ClientId][index] = 20;
+	index = (index+1) % MAX_CHAT_MESSAGES;
+	amount_chats[ClientId] = index;
+}
+
+void CGameContext::DoChat(int ClientId)
+{
+	if(!m_apPlayers[ClientId])
+		return;
+	
+	for(int i = 0; i < MAX_CHAT_MESSAGES; i++)
+	{
+		if(chat_ticks[ClientId][i] == 0)
+		{
+			Server()->SendPackMsg(&saved_chats[ClientId][i], MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		}
+		chat_ticks[ClientId][i]--;
+	}
+}
+
 void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, int SpamProtectionClientId, int VersionFlags)
 {
 	if(SpamProtectionClientId >= 0 && SpamProtectionClientId < MAX_CLIENTS)
@@ -697,8 +726,8 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				{
 					if(!Server()->Translate(id, i) && ChatterClientId != i)
 					{
-						Msg.m_ClientId = -1;
-						str_format(bBuf, sizeof(bBuf), "%s: %s", Server()->ClientName(ChatterClientId), aText);
+						SaveChat(Msg, i);
+						continue;
 					}
 				}
 				Msg.m_pMessage = bBuf;
@@ -737,8 +766,8 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 					str_copy(bBuf, aText, sizeof(aText));
 					if(!Server()->Translate(id, i) && ChatterClientId != i)
 					{
-						Msg.m_ClientId = -1;
-						str_format(bBuf, sizeof(bBuf), "%s: %s", Server()->ClientName(ChatterClientId), aText);
+						SaveChat(Msg, i);
+						continue;
 					}
 				}
 				Msg.m_pMessage = bBuf;
@@ -1077,6 +1106,11 @@ void CGameContext::OnTick()
 {
 	// check tuning
 	CheckPureTuning();
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		DoChat(i);
+	}
 
 	if(m_TeeHistorianActive)
 	{
@@ -4101,6 +4135,14 @@ void CGameContext::OnInit(const void *pPersistentData)
 	CreateAllEntities(true);
 
 	m_pAntibot->RoundStart(this);
+
+	for(int j = 0; j < MAX_CLIENTS; j++)
+	{
+		for(int i = 0; i < MAX_CHAT_MESSAGES; i++)
+		{
+			chat_ticks[j][i] = -1;
+		}
+	}
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
