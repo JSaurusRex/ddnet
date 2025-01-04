@@ -151,7 +151,7 @@ void CCharacter::SetWeapon(int W)
 	m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_QueuedWeapon = -1;
 	m_Core.m_ActiveWeapon = W;
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask(true));
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
@@ -355,7 +355,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Hit a player, give them damage and stuffs...
-				GameServer()->CreateSound(pChr->m_Pos, SOUND_NINJA_HIT, TeamMask());
+				GameServer()->CreateSound(pChr->m_Pos, SOUND_NINJA_HIT, TeamMask(true));
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = pChr;
@@ -471,7 +471,7 @@ void CCharacter::FireWeapon()
 		if(m_PainSoundTimer <= 0 && !(m_LatestPrevInput.m_Fire & 1))
 		{
 			m_PainSoundTimer = 1 * Server()->TickSpeed();
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 		return;
 	}
@@ -488,7 +488,7 @@ void CCharacter::FireWeapon()
 	{
 		// reset objects Hit
 		m_NumObjectsHit = 0;
-		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
 
@@ -565,7 +565,7 @@ void CCharacter::FireWeapon()
 				MouseTarget //InitDir
 			);
 
-			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	break;
@@ -575,7 +575,7 @@ void CCharacter::FireWeapon()
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
-		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -596,7 +596,7 @@ void CCharacter::FireWeapon()
 			MouseTarget // MouseTarget
 		);
 
-		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -605,7 +605,7 @@ void CCharacter::FireWeapon()
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
-		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
@@ -618,7 +618,7 @@ void CCharacter::FireWeapon()
 		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * Server()->TickSpeed() / 1000;
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
-		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask(true)); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 	}
@@ -663,7 +663,7 @@ void CCharacter::GiveNinja()
 	m_Core.m_ActiveWeapon = WEAPON_NINJA;
 
 	if(!m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
-		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, TeamMask());
+		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, TeamMask(true));
 }
 
 void CCharacter::RemoveNinja()
@@ -872,9 +872,9 @@ void CCharacter::TickDeferred()
 
 		// Some sounds are triggered client-side for the acting player (or for all players on Sixup)
 		// so we need to avoid duplicating them
-		CClientMask TeamMaskExceptSelfAndSixup = Teams()->TeamMask(Team(), CID, CID, CGameContext::FLAG_SIX);
+		CClientMask TeamMaskExceptSelfAndSixup = Teams()->TeamMask(Team(), CID, CID, CGameContext::FLAG_SIX, true);
 		// Some are triggered client-side but only on Sixup
-		CClientMask TeamMaskExceptSixup = Teams()->TeamMask(Team(), -1, CID, CGameContext::FLAG_SIX);
+		CClientMask TeamMaskExceptSixup = Teams()->TeamMask(Team(), -1, CID, CGameContext::FLAG_SIX, true);
 
 		if(Events & COREEVENT_GROUND_JUMP)
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelfAndSixup);
@@ -994,7 +994,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	}
 
 	// a nice sound
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask(true));
 
 	// this is to rate limit respawning to 3 secs
 	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
@@ -2229,7 +2229,7 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_IsBlueTeleGunTeleport)
 			m_Core.m_Vel = vec2(0, 0);
 		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCid(), TeamMask());
-		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
+		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask(true));
 		m_TeleGunTeleport = false;
 		m_IsBlueTeleGunTeleport = false;
 	}
@@ -2441,9 +2441,9 @@ void CCharacter::Rescue()
 	}
 }
 
-CClientMask CCharacter::TeamMask()
+CClientMask CCharacter::TeamMask(bool isSound)
 {
-	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCid());
+	return Teams()->TeamMask(Team(), -1, GetPlayer()->GetCid(), isSound);
 }
 
 void CCharacter::SetPosition(const vec2 &Position)

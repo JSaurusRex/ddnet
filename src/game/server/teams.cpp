@@ -218,6 +218,8 @@ void CGameTeams::Tick()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		m_NumSounds[i] = 0;
+
 		CPlayerData *pData = GameServer()->Score()->PlayerData(i);
 		if(!Server()->IsRecording(i))
 			continue;
@@ -507,7 +509,7 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionFlags)
+CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionFlags, bool IsSound)
 {
 	if(Team == TEAM_SUPER)
 	{
@@ -578,6 +580,13 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 			// 	if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
 			// 		continue; // in different teams
 			// }
+		}
+
+		if(IsSound && Asker >= 0 && Asker != i && g_Config.m_SvLimitSounds)
+		{
+			m_NumSounds[Asker]++;
+			if(m_NumSounds[Asker] > g_Config.m_SvLimitSounds)
+				continue;
 		}
 
 		Mask.set(i);

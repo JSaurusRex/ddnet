@@ -91,7 +91,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
-	CClientMask TeamMask();
+	CClientMask TeamMask(bool isSound=false);
 
 	void SetPosition(const vec2 &Position);
 	void Move(vec2 RelPos);
