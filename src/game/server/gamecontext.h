@@ -427,6 +427,7 @@ private:
 	static void ConGoRight(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetPerf(IConsole::IResult *pResult, void *pUserData);
 	static void ConKO_Start(IConsole::IResult *pResult, void *pUserData);
 	static void ConKO_Stop(IConsole::IResult *pResult, void *pUserData);
 	static void ConKO_Restart(IConsole::IResult *pResult, void *pUserData);

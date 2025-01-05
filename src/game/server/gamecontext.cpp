@@ -275,6 +275,12 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 		score += 1;
 		if(pPlayer->GetCharacter()->IsSnappingCharacterInView(SnappingClient))
 			score += 5;
+		
+		if(SnappingClient > 0 && m_apPlayers[SnappingClient] && m_apPlayers[SnappingClient]->GetCharacter())
+		{
+			if(distance(m_apPlayers[SnappingClient]->GetCharacter()->m_Pos, pPlayer->GetCharacter()->m_Pos) < 600)
+				score += 3;
+		}
 	}
 
 	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
@@ -3752,6 +3758,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("votes", "?i[page]", CFGFLAG_SERVER, ConVotes, this, "Show all votes (page 0 by default, 20 entries per page)");
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
+
+	Console()->Register("get_perf", "", CFGFLAG_SERVER, ConGetPerf, this, "Gives longest time taken to snap in last 30 seconds in ms");
 
 	Console()->Register("start_round", "i[seconds]", CFGFLAG_SERVER, ConKO_Start, this, "Starts round, time in seconds");
 	Console()->Register("stop_round", "i[seconds]", CFGFLAG_SERVER, ConKO_Stop, this, "Stops the round in X seconds");

@@ -42,6 +42,20 @@ void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
 	pSelf->MoveCharacter(pResult->m_ClientId, 0, Tiles);
 }
 
+void CGameContext::ConGetPerf(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char str[256];
+
+	str_format(str, sizeof(str), "Slowest snap in last %i seconds: %ims", pSelf->Server()->m_slowestSnapAge/pSelf->Server()->TickSpeed() * (2-g_Config.m_SvHighBandwidth), pSelf->Server()->m_slowestSnap);
+	pSelf->Server()->m_slowestSnapAge += pSelf->Server()->TickSpeed()*30;
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "GetPerf",
+			str);
+}
+
+
 void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

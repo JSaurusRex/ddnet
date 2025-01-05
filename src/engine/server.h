@@ -65,6 +65,9 @@ public:
 	virtual int * GetClientsClients(int ClientId) const = 0;
 	virtual int DoesClientHaveClient(int ClientId, int id2) const = 0;
 
+	int m_slowestSnap = 0;
+	int m_slowestSnapAge = 0;
+
 	/**
 	 * Returns the version of the client with the given client ID.
 	 *

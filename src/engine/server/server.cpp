@@ -213,8 +213,12 @@ void CServer::CClient::Reset()
 
 	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
 	{
-		m_aClientClientIds[i] = -1;
-		m_aServerClientIds[i] = -1;
+		m_aClientClientIds[i] = i;
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_aServerClientIds[i] = i;
 	}
 
 	m_Snapshots.PurgeAll();
@@ -246,8 +250,6 @@ void CServer::SetClientSlots(int ClientId)
 		if(GameServer()->IsClientPlayer(i))
 			ClientScores[i]++;
 		
-		// ClientScores[i]	+= i; //for testing prefer newer clients
-
 		ClientScores[i] += GameServer()->GiveClientClientScore(ClientId, i);
 
 		if(m_aClients[ClientId].m_aServerClientIds[i] != -1)
@@ -292,7 +294,7 @@ void CServer::SetClientSlots(int ClientId)
 		if(m_aClients[ClientId].m_aServerClientIds[highestId] != -1)
 		{
 			AlreadyThere[highestId] = m_aClients[ClientId].m_aServerClientIds[highestId];
-			AlreadyThere2[AlreadyThere[highestId]] = m_aClients[ClientId].m_aClientClientIds[highestId];
+			AlreadyThere2[AlreadyThere[highestId]] = highestId;
 		}
 
 		//check if its already there
@@ -1073,7 +1075,9 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			if(i % 7 == Tick() % 7 && g_Config.m_SvClientMapping)
+			// m_aClients[i].m_aServerClientIds[i] = 0;
+			// m_aClients[i].m_aClientClientIds[0] = i;
+			if(i % g_Config.m_SvClientMappingTime == (Tick()/(2-g_Config.m_SvHighBandwidth)) % g_Config.m_SvClientMappingTime && g_Config.m_SvClientMapping)
 				SetClientSlots(i);
 			
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
@@ -3101,7 +3105,18 @@ int CServer::Run()
 			if(NewTicks)
 			{
 				if(Config()->m_SvHighBandwidth || (m_CurrentGameTick % 2) == 0)
+				{
+					std::clock_t start = std::clock();
 					DoSnapshot();
+					int duration = ( std::clock() - start ) / (double) (CLOCKS_PER_SEC/1000.0);
+
+					m_slowestSnapAge++;
+					if(m_slowestSnap < duration || m_slowestSnapAge > TickSpeed()*30)	/*get slowest snap of past 30 seconds*/
+					{
+						m_slowestSnap = duration;
+						m_slowestSnapAge = 0;
+					}
+				}
 
 				UpdateClientRconCommands();
 

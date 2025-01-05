@@ -430,6 +430,7 @@ MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, MAX_CLIENTS, 1, MAX_CLIENTS, CFGF
 MACRO_CONFIG_INT(SvMaxClientsPerIp, sv_max_clients_per_ip, 4, 1, MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients with the same IP that can connect to the server")
 MACRO_CONFIG_INT(SvHighBandwidth, sv_high_bandwidth, 0, 0, 1, CFGFLAG_SERVER, "Use high bandwidth mode. Doubles the bandwidth required for the server. LAN use only")
 MACRO_CONFIG_INT(SvClientMapping, sv_client_mapping, 0, 0, 1, CFGFLAG_SERVER, "Allows more than 64 players at a time by choosing best players to show")
+MACRO_CONFIG_INT(SvClientMappingTime, sv_client_mapping_time, 10, 1, 100, CFGFLAG_SERVER, "How much time between client mapping function per player")
 MACRO_CONFIG_INT(SvLimitSounds, sv_limit_sounds, 5, 0, 999, CFGFLAG_SERVER, "Max allowed sounds per tick, 0 to disable max")
 MACRO_CONFIG_STR(SvRegister, sv_register, 16, "1", CFGFLAG_SERVER, "Register server with master server for public listing, can also accept a comma-separated list of protocols to register on, like 'ipv4,ipv6'")
 MACRO_CONFIG_STR(SvRegisterExtra, sv_register_extra, 256, "", CFGFLAG_SERVER, "Extra headers to send to the register endpoint, comma separated 'Header: Value' pairs")
