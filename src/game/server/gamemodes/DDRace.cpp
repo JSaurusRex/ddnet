@@ -311,7 +311,7 @@ void CGameControllerDDRace::OnReset()
 
 void CGameControllerDDRace::Tick()
 {
-	if(m_Warmup <= 0 && GameServer()->ko_game)
+	if(m_Warmup <= 0 && GameServer()->ko_game && !GameServer()->m_World.m_Paused)
 	{
 		m_Timer--;
 		if(m_Timer < 10*Server()->TickSpeed() && m_Timer % Server()->TickSpeed() == 0)

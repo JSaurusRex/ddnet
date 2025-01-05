@@ -532,7 +532,7 @@ bool IGameController::CanBeMovedOnBalance(int ClientId)
 void IGameController::Tick()
 {
 	// do warmup
-	if(m_Warmup)
+	if(m_Warmup && !GameServer()->m_World.m_Paused)
 	{
 		m_Warmup--;
 		if(!m_Warmup && GameServer()->ko_game)
