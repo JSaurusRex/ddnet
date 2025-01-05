@@ -339,6 +339,7 @@ void CProjectile::Snap(int SnappingClient)
 			return;
 		}
 		FillExtraInfo(pDDNetProjectile);
+		Server()->Translate(pDDNetProjectile->m_Owner, SnappingClient);
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
 	{
