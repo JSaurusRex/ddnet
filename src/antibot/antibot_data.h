@@ -2,6 +2,7 @@
 #define ANTIBOT_ANTIBOT_DATA_H
 
 #include <base/vmath.h>
+#include <engine/shared/protocol.h>
 
 enum
 {
@@ -10,7 +11,7 @@ enum
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
 
-	ANTIBOT_MAX_CLIENTS = 64,
+	ANTIBOT_MAX_CLIENTS = MAX_CLIENTS,
 };
 
 struct CAntibotMapData
