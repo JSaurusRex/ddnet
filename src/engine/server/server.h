@@ -85,10 +85,10 @@ class CServer : public IServer
 
 	class CDbConnectionPool *m_pConnectionPool;
 
-#ifdef CONF_DEBUG
+// #ifdef CONF_DEBUG
 	int m_PreviousDebugDummies = 0;
 	void UpdateDebugDummies(bool ForceDisconnect);
-#endif
+// #endif
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
@@ -153,6 +153,7 @@ public:
 
 		int m_aClientClientIds[MAX_CLIENTS_PER_CLIENT];
 		int m_aServerClientIds[MAX_CLIENTS];
+		int m_StaticClientScore = 0;
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];

@@ -405,6 +405,7 @@ public:
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 
 	virtual int GiveClientClientScore(int SnappingClient, int ClientId) const = 0;
+	virtual int GiveStaticClientClientScore(int ClientId) const = 0;
 
 	/**
 	 * Used to report custom player info to master servers.

@@ -220,6 +220,8 @@ void CServer::CClient::Reset()
 	{
 		m_aServerClientIds[i] = i;
 	}
+	
+	m_StaticClientScore = 0;
 
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
@@ -231,35 +233,36 @@ void CServer::CClient::Reset()
 	m_RedirectDropTime = 0;
 }
 
+//should be slightly above max score that a player can get, for counting sort trick
+#define MAX_SCORE 40
 void CServer::SetClientSlots(int ClientId)
 {
 	int ClientScores [MAX_CLIENTS] = {0};
 
-	ClientScores[ClientId] = 999;
+	//calculate client score
+	m_aClients[ClientId].m_StaticClientScore = GameServer()->GiveStaticClientClientScore(ClientId);
+
 	//calculate score for each client
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		//todo: calculate client score
 		if(!GameServer()->PlayerExists(i))
 		{
+			m_aClients[i].m_StaticClientScore = 0;
 			continue;
 		}
 		
-		ClientScores[i]++;
-
-		if(GameServer()->IsClientPlayer(i))
-			ClientScores[i]++;
+		ClientScores[i] = m_aClients[i].m_StaticClientScore;
 		
 		ClientScores[i] += GameServer()->GiveClientClientScore(ClientId, i);
 
 		if(m_aClients[ClientId].m_aServerClientIds[i] != -1)
 		{
-			ClientScores[i]++;
+			ClientScores[i] += 5;
 		}
 
-		if(i == ClientId)
-			ClientScores[i] += 999;
 	}
+	ClientScores[ClientId] = MAX_SCORE;
 
 	//make array of top n Clients
 	int newSlots [MAX_CLIENTS_PER_CLIENT] = {-1};
@@ -269,35 +272,69 @@ void CServer::SetClientSlots(int ClientId)
 	int AlreadyThere2 [MAX_CLIENTS_PER_CLIENT] = {-1};
 	memset(AlreadyThere2, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
 
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	//algoritm for getting top X clients in O(n)
+	int AmountPlayers = 0;
+	int counter [MAX_SCORE+1] = {0};
+	memset(counter, 0, (MAX_SCORE+1)*sizeof(int));
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		//find highest score client and add it
-		int highest = 0;
-		int highestId = -1;
-		for(int j = 0; j < MAX_CLIENTS; j++)
-		{
-			// non connected clients have a score of 0, so at least go beyond that score
-			if(ClientScores[j] > highest)
-			{
-				highest = ClientScores[j];
-				highestId = j;
-			}
-		}
-
-		if(highestId == -1)
-			break;
+		if(ClientScores[i] <= 0)
+			continue;
 		
-		ClientScores[highestId] = -1;
-		newSlots[i] = highestId;
-
-
-		if(m_aClients[ClientId].m_aServerClientIds[highestId] != -1)
+		if(ClientScores[i] > MAX_SCORE)
 		{
-			AlreadyThere[highestId] = m_aClients[ClientId].m_aServerClientIds[highestId];
-			AlreadyThere2[AlreadyThere[highestId]] = highestId;
+			ClientScores[i] = MAX_SCORE-1;
+			//can't be player so make it lower than player to ensure player is always in
+		}
+		AmountPlayers++;
+
+		counter[ClientScores[i]]++;
+	}
+
+	//walk through backwards and make it so that all numbers remaining add up to 64 or under
+	int slots_used = 0;
+	int slots_remaining = MAX_CLIENTS_PER_CLIENT;
+	for(int i = MAX_SCORE; i >= 0; i--)
+	{
+		if(slots_remaining == 0)
+		{
+			counter[i] = 0;
+		}else if(slots_remaining <= counter[i])
+		{
+			counter[i] = slots_remaining;
+			slots_used += slots_remaining;
+			slots_remaining = 0;
+		}else if(slots_remaining - counter[i] >= 0)
+		{
+			slots_remaining -= counter[i];
+			slots_used += counter[i];
 		}
 	}
 
+	//select top MAX_CLIENTS_PER_CLIENT clients
+	int AmountFound = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(ClientScores[i] < 0)
+			continue;
+		
+		if(counter[ClientScores[i]] <= 0)
+			continue;
+		
+		counter[ClientScores[i]]--;
+
+		newSlots[AmountFound] = i;
+		AmountFound++;
+
+
+		if(m_aClients[ClientId].m_aServerClientIds[i] != -1)
+		{
+			AlreadyThere[i] = m_aClients[ClientId].m_aServerClientIds[i];
+			AlreadyThere2[AlreadyThere[i]] = i;
+		}
+	}
+
+	//find clients in old list but not new list
 	int AmountEmptySpots = 0;
 	int EmptySpots [MAX_CLIENTS_PER_CLIENT] = {-1};
 	memset(EmptySpots, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
@@ -313,40 +350,21 @@ void CServer::SetClientSlots(int ClientId)
 	int IndexEmptySpots = 0;
 
 	//replace client slots
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT && newSlots[i] != -1; i++)
+	int limit = g_Config.m_SvClientMappingLimit; //limit per snap how many can change
+	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT && newSlots[i] != -1 && limit > 0; i++)
 	{
-		if(AlreadyThere[newSlots[i]] != -1)
+		if(AlreadyThere[newSlots[i]] == -1)
 		{
-			//character is already there
-
-			//todo: maybe something?
-		}else
-		{
-			//find first empty slot
+			//get next empty slot
 			AlreadyThere[newSlots[i]] = EmptySpots[IndexEmptySpots];
 			m_aClients[ClientId].m_aClientClientIds[EmptySpots[IndexEmptySpots]] = newSlots[i];
 			IndexEmptySpots++;
-
-			// for(int j = 0; j < MAX_CLIENTS_PER_CLIENT; j++)
-			// {
-			// 	if(AlreadyThere2[j] == -1)
-			// 	{
-			// 		//found empty spot
-			// 		AlreadyThere2[j] = newSlots[i];
-			// 		AlreadyThere[newSlots[i]] = j;
-			// 		m_aClients[ClientId].m_aClientSlots[j].m_Server_ClientId = newSlots[i];
-			// 		break;
-			// 	}
-			// }
+			limit--;
 		}
 	}
 
 
 	memset(m_aClients[ClientId].m_aServerClientIds, -1, sizeof(int)*MAX_CLIENTS);
-	// for(int i = 0; i < MAX_CLIENTS; i++)
-	// {
-	// 	m_aClients[ClientId].m_aServerClientIds[i] = -1;
-	// }
 
 	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
 	{
@@ -667,6 +685,7 @@ int CServer::Init()
 		Client.m_Latency = 0;
 		Client.m_Sixup = false;
 		Client.m_RedirectDropTime = 0;
+		Client.m_StaticClientScore = 0;
 	}
 
 	m_CurrentGameTick = MIN_TICK;
@@ -2791,7 +2810,7 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
-#ifdef CONF_DEBUG
+// #ifdef CONF_DEBUG
 void CServer::UpdateDebugDummies(bool ForceDisconnect)
 {
 	if(m_PreviousDebugDummies == g_Config.m_DbgDummies && !ForceDisconnect)
@@ -2829,7 +2848,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 
 	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_DbgDummies;
 }
-#endif
+// #endif
 
 int CServer::Run()
 {
@@ -2987,9 +3006,9 @@ int CServer::Run()
 						}
 					}
 
-#ifdef CONF_DEBUG
+// #ifdef CONF_DEBUG
 					UpdateDebugDummies(true);
-#endif
+// #endif
 					GameServer()->OnShutdown(m_pPersistentData);
 
 					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
@@ -3042,9 +3061,9 @@ int CServer::Run()
 			{
 				GameServer()->OnPreTickTeehistorian();
 
-#ifdef CONF_DEBUG
+// #ifdef CONF_DEBUG
 				UpdateDebugDummies(false);
-#endif
+// #endif
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
 				{

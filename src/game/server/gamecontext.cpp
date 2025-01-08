@@ -259,7 +259,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 	}
 }
 
-int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
+int CGameContext::GiveStaticClientClientScore(int ClientId) const
 {
 	if(!PlayerExists(ClientId))
 		return -1;
@@ -269,19 +269,6 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 		score += 1;
-	
-	if(pPlayer->GetCharacter())
-	{
-		score += 1;
-		if(pPlayer->GetCharacter()->IsSnappingCharacterInView(SnappingClient))
-			score += 5;
-		
-		if(SnappingClient > 0 && m_apPlayers[SnappingClient] && m_apPlayers[SnappingClient]->GetCharacter())
-		{
-			if(distance(m_apPlayers[SnappingClient]->GetCharacter()->m_Pos, pPlayer->GetCharacter()->m_Pos) < 600)
-				score += 3;
-		}
-	}
 
 	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
 		score += 15;
@@ -289,8 +276,35 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
 		score += 3;
 	
-	if(pPlayer->m_LastActionTick > Server()->Tick()-Server()->TickSpeed()*15)	//hyper activity is good
+	if(pPlayer->m_LastActionTick > Server()->Tick()-Server()->TickSpeed()*5)	//hyper activity is good
 		score += 2;
+	
+	return score;
+}
+
+int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
+{
+	if(!PlayerExists(ClientId))
+		return -1;
+	
+	int score = 0;
+	CPlayer * pPlayer = m_apPlayers[ClientId];
+	
+	if(pPlayer->GetCharacter())
+	{
+		score += 1;
+
+		if(m_apPlayers[ClientId]->GetCharacter()->IsSnappingCharacterInView(SnappingClient))
+			score += 5;
+		
+		if(SnappingClient >= 0 && m_apPlayers[SnappingClient] && m_apPlayers[SnappingClient]->GetCharacter())
+		{
+			if(distance(m_apPlayers[SnappingClient]->GetCharacter()->m_Pos, pPlayer->GetCharacter()->m_Pos) < 500)
+			{
+				score += 5;
+			}
+		}
+	}
 	
 	return score;
 }

@@ -360,6 +360,7 @@ public:
 	bool OnClientDDNetVersionKnown(int ClientId);
 	void FillAntibot(CAntibotRoundData *pData) override;
 	int GiveClientClientScore(int SnappingClient, int ClientId) const override;
+	int GiveStaticClientClientScore(int ClientId) const override;
 	bool ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientId) const;
 	// Describes the time when the first player joined the server.

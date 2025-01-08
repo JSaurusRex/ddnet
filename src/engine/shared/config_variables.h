@@ -273,9 +273,9 @@ MACRO_CONFIG_INT(ClVideoX264Crf, cl_video_crf, 18, 0, 51, CFGFLAG_CLIENT | CFGFL
 MACRO_CONFIG_INT(ClVideoX264Preset, cl_video_preset, 5, 0, 9, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Set preset when encode video with libx264, default is 5 (medium), 0 is ultrafast, 9 is placebo (the slowest, not recommend)")
 
 // debug
-#ifdef CONF_DEBUG
+// #ifdef CONF_DEBUG
 MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "Add debug dummies to server (Debug build only)")
-#endif
+// #endif
 
 MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 2, CFGFLAG_CLIENT, "Display information about the tuning parameters that affect the own player (0 = off, 1 = show changed, 2 = show all)")
 
@@ -431,6 +431,7 @@ MACRO_CONFIG_INT(SvMaxClientsPerIp, sv_max_clients_per_ip, 4, 1, MAX_CLIENTS, CF
 MACRO_CONFIG_INT(SvHighBandwidth, sv_high_bandwidth, 0, 0, 1, CFGFLAG_SERVER, "Use high bandwidth mode. Doubles the bandwidth required for the server. LAN use only")
 MACRO_CONFIG_INT(SvClientMapping, sv_client_mapping, 0, 0, 1, CFGFLAG_SERVER, "Allows more than 64 players at a time by choosing best players to show")
 MACRO_CONFIG_INT(SvClientMappingTime, sv_client_mapping_time, 10, 1, 100, CFGFLAG_SERVER, "How much time between client mapping function per player")
+MACRO_CONFIG_INT(SvClientMappingLimit, sv_client_mapping_limit, 32, 1, 64, CFGFLAG_SERVER, "How many clients can be remapped per client in 1 snap")
 MACRO_CONFIG_INT(SvLimitSounds, sv_limit_sounds, 5, 0, 999, CFGFLAG_SERVER, "Max allowed sounds per tick, 0 to disable max")
 MACRO_CONFIG_STR(SvRegister, sv_register, 16, "1", CFGFLAG_SERVER, "Register server with master server for public listing, can also accept a comma-separated list of protocols to register on, like 'ipv4,ipv6'")
 MACRO_CONFIG_STR(SvRegisterExtra, sv_register_extra, 256, "", CFGFLAG_SERVER, "Extra headers to send to the register endpoint, comma separated 'Header: Value' pairs")
