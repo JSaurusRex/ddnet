@@ -781,9 +781,9 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				char bBuf[256];
 				int id = ChatterClientId;
 				Msg.m_ClientId = ChatterClientId;
+				str_copy(bBuf, aText, sizeof(aText));
 				if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
 				{
-					str_copy(bBuf, aText, sizeof(aText));
 					if(!Server()->Translate(id, i) && ChatterClientId != i)
 					{
 						SaveChat(Msg, i);
@@ -1127,10 +1127,11 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		DoChat(i);
-	}
+	if(g_Config.m_SvClientMapping)
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			DoChat(i);
+		}
 
 	if(m_TeeHistorianActive)
 	{
