@@ -100,6 +100,7 @@ void CGameControllerDDRace::KO_Start()
 		pChar->ResetInput();
 		
 
+		Teams().OnCharacterStart(i);
 		pChar->m_StartTime = Server()->Tick();
 		pChar->m_DDRaceState = DDRACE_STARTED;
 
