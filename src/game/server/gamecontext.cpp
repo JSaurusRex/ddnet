@@ -270,7 +270,7 @@ int CGameContext::GiveStaticClientClientScore(int ClientId) const
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 		score += 1;
 
-	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*15)	//somebody who chatted in the last 15 seconds is important
+	if(pPlayer->m_LastChatTick > Server()->Tick()-Server()->TickSpeed()*4)	//somebody who chatted in the last 15 seconds is important
 		score += 15;
 	
 	if(!pPlayer->m_player_eliminated || pPlayer->GetCharacter())
@@ -299,9 +299,9 @@ int CGameContext::GiveClientClientScore(int SnappingClient, int ClientId) const
 		
 		if(SnappingClient >= 0 && m_apPlayers[SnappingClient] && m_apPlayers[SnappingClient]->GetCharacter())
 		{
-			if(distance(m_apPlayers[SnappingClient]->GetCharacter()->m_Pos, pPlayer->GetCharacter()->m_Pos) < 500)
+			if(distance(m_apPlayers[SnappingClient]->m_ViewPos, pPlayer->GetCharacter()->m_Pos) < 500)
 			{
-				score += 5;
+				score += 4;
 			}
 		}
 	}
