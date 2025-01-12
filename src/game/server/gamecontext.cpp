@@ -352,7 +352,20 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
-	int Num = m_World.FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = 1;
+
+	if(g_Config.m_SvSoloServer)
+	{
+		CCharacter * pCharacter = GetPlayerChar(Owner);
+		if(!pCharacter)
+			return;
+		Num = 1;
+		apEnts[0] = pCharacter;
+	}else
+	{
+		Num = m_World.FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	}
+
 	CClientMask TeamMask = CClientMask().set();
 	for(int i = 0; i < Num; i++)
 	{

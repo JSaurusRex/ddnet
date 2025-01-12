@@ -317,6 +317,7 @@ void CCharacter::HandleNinja()
 		ResetVelocity();
 
 		// check if we Hit anything along the way
+		if(!g_Config.m_SvSoloServer)
 		{
 			CEntity *apEnts[MAX_CLIENTS];
 			float Radius = GetProximityRadius() * 2.0f;
@@ -492,7 +493,7 @@ void CCharacter::FireWeapon()
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
 
-		if(m_Core.m_HammerHitDisabled)
+		if(m_Core.m_HammerHitDisabled || g_Config.m_SvSoloServer)
 			break;
 
 		CEntity *apEnts[MAX_CLIENTS];
