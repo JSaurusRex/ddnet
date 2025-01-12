@@ -2613,6 +2613,9 @@ void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Clien
 {
 	if(m_World.m_Paused)
 		return;
+	
+	if(ko_game)
+		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 
