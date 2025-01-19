@@ -213,12 +213,13 @@ void CServer::CClient::Reset()
 
 	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
 	{
-		m_aClientClientIds[i] = i;
+		m_aClientClientIds[i] = -1;
+		m_aClientSlotUpdated[i] = 0;
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_aServerClientIds[i] = i;
+		m_aServerClientIds[i] = -1;
 	}
 	
 	m_StaticClientScore = 0;
@@ -237,7 +238,18 @@ void CServer::CClient::Reset()
 #define MAX_SCORE 40
 void CServer::SetClientSlots(int ClientId)
 {
+	m_aClients[ClientId].m_aClientClientIds[0] = ClientId;
+	m_aClients[ClientId].m_aServerClientIds[ClientId] = 0;
+
 	int ClientScores [MAX_CLIENTS] = {0};
+
+	int MaxClientsSlots = MAX_CLIENTS_PER_CLIENT;
+
+	if(IsSixup(ClientId))
+		MaxClientsSlots = 16;
+	
+	if(GetClientVersion(ClientId) < VERSION_DDNET_OLD)
+		MaxClientsSlots = 16;
 
 	//calculate client score
 	m_aClients[ClientId].m_StaticClientScore = GameServer()->GiveStaticClientClientScore(ClientId);
@@ -293,7 +305,7 @@ void CServer::SetClientSlots(int ClientId)
 
 	//walk through backwards and make it so that all numbers remaining add up to 64 or under
 	int slots_used = 0;
-	int slots_remaining = MAX_CLIENTS_PER_CLIENT;
+	int slots_remaining = MaxClientsSlots;
 	for(int i = MAX_SCORE; i >= 0; i--)
 	{
 		if(slots_remaining == 0)
@@ -338,7 +350,7 @@ void CServer::SetClientSlots(int ClientId)
 	int AmountEmptySpots = 0;
 	int EmptySpots [MAX_CLIENTS_PER_CLIENT] = {-1};
 	memset(EmptySpots, -1, MAX_CLIENTS_PER_CLIENT*sizeof(int));
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	for(int i = 0; i < MaxClientsSlots; i++)
 	{
 		if(AlreadyThere2[i] == -1)
 		{
@@ -351,12 +363,17 @@ void CServer::SetClientSlots(int ClientId)
 
 	//replace client slots
 	int limit = g_Config.m_SvClientMappingLimit; //limit per snap how many can change
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT && newSlots[i] != -1 && limit > 0; i++)
+	for(int i = 0; i < MaxClientsSlots && newSlots[i] != -1 && limit > 0; i++)
 	{
 		if(AlreadyThere[newSlots[i]] == -1)
 		{
 			//get next empty slot
 			AlreadyThere[newSlots[i]] = EmptySpots[IndexEmptySpots];
+			
+			m_aClients[ClientId].m_aClientSlotUpdated[EmptySpots[IndexEmptySpots]] = 1;
+			if(m_aClients[ClientId].m_aClientClientIds[EmptySpots[IndexEmptySpots]] != -1)
+				m_aClients[ClientId].m_aClientSlotUpdated[EmptySpots[IndexEmptySpots]] = 2;
+			
 			m_aClients[ClientId].m_aClientClientIds[EmptySpots[IndexEmptySpots]] = newSlots[i];
 			IndexEmptySpots++;
 			limit--;
@@ -364,10 +381,14 @@ void CServer::SetClientSlots(int ClientId)
 	}
 
 
-	memset(m_aClients[ClientId].m_aServerClientIds, -1, sizeof(int)*MAX_CLIENTS);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		m_aClients[ClientId].m_aServerClientIds[i] = -1;
 
-	for(int i = 0; i < MAX_CLIENTS_PER_CLIENT; i++)
+	for(int i = 0; i < MaxClientsSlots; i++)
 	{
+		if(m_aClients[ClientId].m_aClientClientIds[i] == -1)
+			continue;
+		
 		m_aClients[ClientId].m_aServerClientIds[m_aClients[ClientId].m_aClientClientIds[i]] = i;
 	}
 }
@@ -785,6 +806,14 @@ int CServer::DoesClientHaveClient(int ClientId, int id2) const
 		return -1;
 	
 	return m_aClients[ClientId].m_aServerClientIds[id2];
+}
+
+int CServer::ClientSlotUpdated(int ClientId, int slot)
+{
+	int value = m_aClients[ClientId].m_aClientSlotUpdated[slot];
+	m_aClients[ClientId].m_aClientSlotUpdated[slot] = 0;
+
+	return value;
 }
 
 const char *CServer::ClientName(int ClientId) const

@@ -64,6 +64,7 @@ public:
 	virtual void GetClientAddr(int ClientId, char *pAddrStr, int Size) const = 0;
 	virtual int * GetClientsClients(int ClientId) const = 0;
 	virtual int DoesClientHaveClient(int ClientId, int id2) const = 0;
+	virtual int ClientSlotUpdated(int ClientId, int slot) = 0;
 
 	int m_slowestSnap = 0;
 	int m_slowestSnapAge = 0;
@@ -192,63 +193,24 @@ public:
 
 	bool Translate(int &Target, int Client)
 	{
-		if(IsSixup(Client))
-			return true;
-		
-		int *pMap;
-		bool Found = false;
-		int amount = VANILLA_MAX_CLIENTS;
 
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)	//ddnet clients
-		{
-			if(!CanMap())
-				return true;
-			
-			amount = MAX_CLIENTS_PER_CLIENT;
-			pMap = GetClientsClients(Client);
-
-			Target = DoesClientHaveClient(Client, Target);
-			if(Target == -1)
-				return false;
-			else
-				return true;
-		}
+		Target = DoesClientHaveClient(Client, Target);
+		if(Target == -1)
+			return false;
 		else
-		{
-			pMap = GetIdMap(Client);
-		}
-
-		for(int i = 0; i < amount; i++)
-		{
-			if(Target == pMap[i])
-			{
-				Target = i;
-				Found = true;
-				break;
-			}
-		}
-		return Found;
+			return true;
 	}
 
 	bool ReverseTranslate(int &Target, int Client)
 	{
-		if(IsSixup(Client))
-			return true;
-		
 		int amount = VANILLA_MAX_CLIENTS;
 		int *pMap = GetIdMap(Client);
-
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
-		{
-			if(!CanMap())
-				return true;
 			
-			amount = MAX_CLIENTS_PER_CLIENT;
-			pMap = GetClientsClients(Client);
+		amount = MAX_CLIENTS_PER_CLIENT;
+		pMap = GetClientsClients(Client);
 
-			if(Target < 0 || Target >= amount)
-				return false;
-		}
+		if(Target < 0 || Target >= amount)
+			return false;
 
 		Target = clamp(Target, 0, amount - 1);
 		if(pMap[Target] == -1)

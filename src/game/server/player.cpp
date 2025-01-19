@@ -325,6 +325,45 @@ void CPlayer::Snap(int SnappingClient)
 	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(id);
 	if(!pClientInfo)
 		return;
+	
+	if(Server()->IsSixup(SnappingClient))
+	{
+		int change = Server()->ClientSlotUpdated(SnappingClient, id);
+		
+		if(SnappingClient % 500 == Server()->Tick()%500)
+			change = 2;
+		
+		if(change)
+		{
+			protocol7::CNetMsg_Sv_ClientDrop Drop;
+			Drop.m_ClientId = id;
+			Drop.m_pReason = "";
+			Drop.m_Silent = true;
+
+			protocol7::CNetMsg_Sv_ClientInfo Info;
+			Info.m_ClientId = id;
+			Info.m_pName = Server()->ClientName(m_ClientId);
+			Info.m_Country = Server()->ClientCountry(m_ClientId);
+			Info.m_pClan = Server()->ClientClan(m_ClientId);
+			Info.m_Local = 0;
+			Info.m_Silent = true;
+			Info.m_Team = GetTeam();
+
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			{
+				Info.m_apSkinPartNames[p] = m_TeeInfos.m_apSkinPartNames[p];
+				Info.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+				Info.m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
+			}
+
+			if(SnappingClient != m_ClientId)
+			{
+				if(change == 2)
+					Server()->SendPackMsg(&Drop, MSGFLAG_VITAL | MSGFLAG_NORECORD, SnappingClient);
+				Server()->SendPackMsg(&Info, MSGFLAG_VITAL | MSGFLAG_NORECORD, SnappingClient);
+			}
+		}
+	}
 
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientId));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientId));
@@ -409,7 +448,7 @@ void CPlayer::Snap(int SnappingClient)
 	{
 		if(!Server()->IsSixup(SnappingClient))
 		{
-			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(m_ClientId);
+			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(id);
 			if(!pSpectatorInfo)
 				return;
 
@@ -419,7 +458,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 		else
 		{
-			protocol7::CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<protocol7::CNetObj_SpectatorInfo>(m_ClientId);
+			protocol7::CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<protocol7::CNetObj_SpectatorInfo>(id);
 			if(!pSpectatorInfo)
 				return;
 
@@ -430,18 +469,21 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
-	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
-	if(!pDDNetPlayer)
-		return;
+	if(SnappingClientVersion > VERSION_VANILLA)
+	{
+		CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
+		if(!pDDNetPlayer)
+			return;
 
-	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
-	pDDNetPlayer->m_Flags = 0;
-	if(m_Afk)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
-	if(m_Paused == PAUSE_SPEC)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
-	if(m_Paused == PAUSE_PAUSED)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+		pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+		pDDNetPlayer->m_Flags = 0;
+		if(m_Afk)
+			pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
+		if(m_Paused == PAUSE_SPEC)
+			pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
+		if(m_Paused == PAUSE_PAUSED)
+			pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+	}
 
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
@@ -474,7 +516,7 @@ void CPlayer::Snap(int SnappingClient)
 void CPlayer::FakeSnap()
 {
 	m_SentSnaps++;
-	if(GetClientVersion() >= VERSION_DDNET_OLD)
+	if(GetClientVersion() >= VERSION_DDNET_OLD || true)
 		return;
 
 	if(Server()->IsSixup(m_ClientId))

@@ -152,6 +152,7 @@ public:
 		int m_CurrentInput;
 
 		int m_aClientClientIds[MAX_CLIENTS_PER_CLIENT];
+		int m_aClientSlotUpdated[MAX_CLIENTS_PER_CLIENT];
 		int m_aServerClientIds[MAX_CLIENTS];
 		int m_StaticClientScore = 0;
 
@@ -305,6 +306,7 @@ public:
 	void GetClientAddr(int ClientId, char *pAddrStr, int Size) const override;
 	int * GetClientsClients(int ClientId) const override;
 	int DoesClientHaveClient(int ClientId, int id2) const override;
+	int ClientSlotUpdated(int ClientId, int slot) override;
 	const char *ClientName(int ClientId) const override;
 	const char *ClientClan(int ClientId) const override;
 	int ClientCountry(int ClientId) const override;

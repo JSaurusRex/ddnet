@@ -1726,19 +1726,24 @@ void CGameContext::OnClientEnter(int ClientId)
 	// update client infos (others before local)
 	for(int i = 0; i < Server()->MaxClients(); ++i)
 	{
-		if(i == ClientId || !m_apPlayers[i] || !Server()->ClientIngame(i))
+		int id = i;
+		if(i == ClientId || !m_apPlayers[i] || !Server()->ClientIngame(i) || !Server()->Translate(id, ClientId))
 			continue;
 
 		CPlayer *pPlayer = m_apPlayers[i];
 
-		if(Server()->IsSixup(i))
+		int id2 = ClientId;
+		if(Server()->IsSixup(i) && Server()->Translate(id2, i))
+		{
+			NewClientInfoMsg.m_ClientId = id2;
 			Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+		}
 
 		if(Server()->IsSixup(ClientId))
 		{
 			// existing infos for new player
 			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
-			ClientInfoMsg.m_ClientId = i;
+			ClientInfoMsg.m_ClientId = id;
 			ClientInfoMsg.m_Local = 0;
 			ClientInfoMsg.m_Team = pPlayer->GetTeam();
 			ClientInfoMsg.m_pName = Server()->ClientName(i);
@@ -1760,6 +1765,7 @@ void CGameContext::OnClientEnter(int ClientId)
 	// local info
 	if(Server()->IsSixup(ClientId))
 	{
+		NewClientInfoMsg.m_ClientId = 0;
 		NewClientInfoMsg.m_Local = 1;
 		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
