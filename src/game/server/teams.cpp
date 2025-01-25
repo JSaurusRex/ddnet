@@ -732,9 +732,10 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	if(world_record > Time)
 	{
 		newRecord = true;
+		world_record = Time;
 	}
 	
-	if((g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores) && !newRecord)
+	if((g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores) && !newRecord && !GameServer()->ko_game)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
 	else
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);
