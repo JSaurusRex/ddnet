@@ -193,7 +193,12 @@ public:
 
 	bool Translate(int &Target, int Client)
 	{
-
+		if(Target < 0 || Target > MAX_CLIENTS)
+			return false;
+		
+		if(Client < 0 || Client > MAX_CLIENTS)
+			return false;
+		
 		Target = DoesClientHaveClient(Client, Target);
 		if(Target == -1)
 			return false;

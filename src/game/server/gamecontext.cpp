@@ -703,7 +703,14 @@ void CGameContext::DoChat(int ClientId)
 	{
 		if(chat_ticks[ClientId][i] == 0)
 		{
-			Server()->SendPackMsg(&saved_chats[ClientId][i], MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+			int id = saved_chats[ClientId][i].m_ClientId;
+			if(Server()->Translate(id, ClientId))
+			{
+				saved_chats[ClientId][i].m_ClientId = id;
+				Server()->SendPackMsg(&saved_chats[ClientId][i], MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+			}
+			else
+				chat_ticks[ClientId][i] = 10;
 		}
 		chat_ticks[ClientId][i]--;
 	}
@@ -795,20 +802,21 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				int id = ChatterClientId;
 				Msg.m_ClientId = ChatterClientId;
 				str_copy(bBuf, aText, sizeof(aText));
-				if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
-				{
-					if(!Server()->Translate(id, i) && ChatterClientId != i)
-					{
-						SaveChat(Msg, i);
-						continue;
-					}
-				}
-				Msg.m_pMessage = bBuf;
+				
 
 				if(Team == TEAM_SPECTATORS && !ko_game)
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 					{
+						if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
+						{
+							if(!Server()->Translate(id, i) && ChatterClientId != i)
+							{
+								SaveChat(Msg, i);
+								continue;
+							}
+						}
+						Msg.m_pMessage = bBuf;
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
 				}
@@ -816,6 +824,15 @@ void CGameContext::SendChat(int ChatterClientId, int Team, const char *pText, in
 				{
 					if(eliminated == m_apPlayers[i]->OutOfGame())
 					{
+						if(ChatterClientId >= 0 && g_Config.m_SvClientMapping)
+						{
+							if(!Server()->Translate(id, i) && ChatterClientId != i)
+							{
+								SaveChat(Msg, i);
+								continue;
+							}
+						}
+						Msg.m_pMessage = bBuf;
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
 				}
@@ -4890,12 +4907,19 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	{
 		CNetMsg_Sv_Chat Msg2;
 		Msg2.m_Team = TEAM_WHISPER_RECV;
-		Msg2.m_ClientId = ClientId;
+		int id = ClientId;
+		if(!Server()->Translate(id, VictimId))
+			return;
+		
+		Msg2.m_ClientId = id;
 		Msg2.m_pMessage = aCensoredMessage;
-		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimId);
-		else
-			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL | MSGFLAG_NORECORD, VictimId);
+		
+		SaveChat(Msg2, VictimId);
+
+		// if(g_Config.m_SvDemoChat)
+		// 	Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimId);
+		// else
+		// 	Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL | MSGFLAG_NORECORD, VictimId);
 	}
 	else
 	{
