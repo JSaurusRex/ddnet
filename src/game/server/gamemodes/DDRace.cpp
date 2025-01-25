@@ -241,7 +241,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			GameServer()->ko_game = false;
 		}else
 		{
-			str_format(aBuf, sizeof(aBuf), "%i spots left!", GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-1);
+			str_format(aBuf, sizeof(aBuf), "%i spots left!", GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-GameServer()->ko_players_finished);
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
@@ -296,10 +296,10 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
-	if(GameServer()->ko_game && !pPlayer->m_elimination)
+	if(GameServer()->ko_game && !pPlayer->m_player_eliminated)
 	{
 		GameServer()->ko_players_tobe_eliminated--;
-		GameServer()->ko_player_count--;
+		// GameServer()->ko_player_count--;
 	}
 	
 	int ClientId = pPlayer->GetCid();
@@ -351,6 +351,7 @@ void CGameControllerDDRace::Tick()
 
 		playersIn++;
 	}
+
 
 	if(playersIn <= GameServer()->ko_players_tobe_eliminated && m_Warmup <= 0 && GameServer()->ko_game)
 	{
