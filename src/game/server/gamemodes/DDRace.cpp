@@ -61,9 +61,6 @@ void CGameControllerDDRace::KO_Start()
 	}
 
 	GameServer()->ko_round++;
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "starting round %i!", GameServer()->ko_round);
-	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	
 	GameServer()->ko_player_count = 0;
 	GameServer()->ko_players_finished = 0;
@@ -125,6 +122,13 @@ void CGameControllerDDRace::KO_Start()
 	
 	// if(GameServer()->ko_player_count > 5)
 	// 	GameServer()->ko_players_tobe_eliminated = 2;
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "starting round %i! Players Left %i", GameServer()->ko_round, GameServer()->ko_player_count);
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+	str_format(aBuf, sizeof(aBuf), "You have %i seconds! %i eliminations", g_Config.m_SvKoTimeLimit, g_Config.m_SvKoEliminations);
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
 
 	m_Timer = g_Config.m_SvKoTimeLimit*Server()->TickSpeed();
 }
@@ -235,6 +239,10 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			}
 
 			GameServer()->ko_game = false;
+		}else
+		{
+			str_format(aBuf, sizeof(aBuf), "%i spots left!", GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-1);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
 
@@ -291,6 +299,7 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 	if(GameServer()->ko_game && !pPlayer->m_elimination)
 	{
 		GameServer()->ko_players_tobe_eliminated--;
+		GameServer()->ko_player_count--;
 	}
 	
 	int ClientId = pPlayer->GetCid();
