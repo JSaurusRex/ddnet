@@ -19,6 +19,7 @@ CGameTeams::CGameTeams(CGameContext *pGameContext) :
 
 void CGameTeams::Reset()
 {
+	world_record = 9999;
 	m_Core.Reset();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -726,7 +727,14 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		"%s finished in: %d minute(s) %5.2f second(s)",
 		Server()->ClientName(ClientId), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
-	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+	
+	bool newRecord = false;
+	if(world_record > Time)
+	{
+		newRecord = true;
+	}
+	
+	if((g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores) && !newRecord)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
 	else
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);

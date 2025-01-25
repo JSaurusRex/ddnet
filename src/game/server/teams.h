@@ -23,6 +23,8 @@ class CGameTeams
 	bool m_aTeeFinished[MAX_CLIENTS];
 	int m_aLastChat[MAX_CLIENTS];
 
+	float world_record = 9999;
+
 	int m_aTeamState[NUM_DDRACE_TEAMS];
 	bool m_aTeamLocked[NUM_DDRACE_TEAMS];
 	bool m_aTeamFlock[NUM_DDRACE_TEAMS];
