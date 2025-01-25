@@ -706,11 +706,10 @@ void CGameContext::DoChat(int ClientId)
 			int id = saved_chats[ClientId][i].m_ClientId;
 			if(Server()->Translate(id, ClientId))
 			{
-				saved_chats[ClientId][i].m_ClientId = id;
 				Server()->SendPackMsg(&saved_chats[ClientId][i], MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 			}
 			else
-				chat_ticks[ClientId][i] = 10;
+				chat_ticks[ClientId][i] = 3;
 		}
 		chat_ticks[ClientId][i]--;
 	}
@@ -4853,7 +4852,10 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 		return;
 
 	if(m_apPlayers[ClientId])
+	{
 		m_apPlayers[ClientId]->m_LastWhisperTo = VictimId;
+		m_apPlayers[ClientId]->m_LastChatTick = Server()->Tick();
+	}
 
 	char aCensoredMessage[256];
 	CensorMessage(aCensoredMessage, pMessage, sizeof(aCensoredMessage));
@@ -4876,10 +4878,13 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 		Msg.m_Team = TEAM_WHISPER_SEND;
 		Msg.m_ClientId = VictimId;
 		Msg.m_pMessage = aCensoredMessage;
-		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-		else
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+
+		SaveChat(Msg, ClientId);
+		
+		// if(g_Config.m_SvDemoChat)
+		// 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		// else
+		// 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 	else
 	{
@@ -4911,7 +4916,7 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 		if(!Server()->Translate(id, VictimId))
 			return;
 		
-		Msg2.m_ClientId = id;
+		Msg2.m_ClientId = ClientId;
 		Msg2.m_pMessage = aCensoredMessage;
 		
 		SaveChat(Msg2, VictimId);
