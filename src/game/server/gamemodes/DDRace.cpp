@@ -288,6 +288,11 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
+	if(GameServer()->ko_game && !pPlayer->m_elimination)
+	{
+		GameServer()->ko_players_tobe_eliminated--;
+	}
+	
 	int ClientId = pPlayer->GetCid();
 	bool WasModerator = pPlayer->m_Moderating && Server()->ClientIngame(ClientId);
 
