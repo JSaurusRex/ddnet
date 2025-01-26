@@ -55,6 +55,24 @@ void CGameContext::ConGetPerf(IConsole::IResult *pResult, void *pUserData)
 			str);
 }
 
+void CGameContext::ConPlayerCount(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int count = 0;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->Server()->ClientIngame(i))
+			count++;
+	}
+
+	char str[256];
+	str_format(str, sizeof(str), "%i players", count);
+
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "PlayerCount", str);
+}
+
 
 void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 {
