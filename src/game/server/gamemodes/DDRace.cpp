@@ -213,7 +213,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 			pPlayer->m_player_eliminated = true;
 		}
 
-		pPlayer->KillCharacter(WEAPON_GAME);
+		pPlayer->KillCharacter(WEAPON_GAME, false);
 
 		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
 		{			
