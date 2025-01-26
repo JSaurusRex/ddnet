@@ -822,7 +822,17 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	}
 	RaceFinishMsg.m_RecordPersonal = (Time < pData->m_BestTime || !pData->m_BestTime);
 	RaceFinishMsg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
-	Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!Server()->ClientIngame(i))
+			continue;
+		
+		RaceFinishMsg.m_ClientId = ClientId;
+
+		if(Server()->Translate(RaceFinishMsg.m_ClientId, i))
+			Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+	}
 
 	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
 	bool NeedToSendNewPersonalRecord = false;
