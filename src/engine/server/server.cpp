@@ -235,7 +235,7 @@ void CServer::CClient::Reset()
 }
 
 //should be slightly above max score that a player can get, for counting sort trick
-#define MAX_SCORE 40
+#define MAX_SCORE 42
 void CServer::SetClientSlots(int ClientId)
 {
 	m_aClients[ClientId].m_aClientClientIds[0] = ClientId;

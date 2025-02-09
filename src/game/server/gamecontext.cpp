@@ -264,7 +264,7 @@ int CGameContext::GiveStaticClientClientScore(int ClientId) const
 	if(!PlayerExists(ClientId))
 		return -1;
 	
-	int score = 0;
+	int score = 1;
 	CPlayer * pPlayer = m_apPlayers[ClientId];
 
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
