@@ -60,6 +60,8 @@ void CGameControllerDDRace::KO_Start()
 		return;
 	}
 
+	m_RoundStartTick = Server()->Tick();
+
 	GameServer()->ko_round++;
 	
 	GameServer()->ko_player_count = 0;
@@ -99,7 +101,7 @@ void CGameControllerDDRace::KO_Start()
 
 		Teams().OnCharacterStart(i);
 		pChar->m_StartTime = Server()->Tick();
-		pChar->m_DDRaceState = DDRACE_STARTED;
+		// pChar->m_DDRaceState = DDRACE_STARTED;
 
 		pChar->m_LastTimeCp = -1;
 		pChar->m_LastTimeCpBroadcasted = -1;

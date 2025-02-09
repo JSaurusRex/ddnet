@@ -583,9 +583,13 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
-	if(GameServer()->ko_game)
-		pGameInfoObj->m_RoundStartTick = Server()->Tick()-m_Timer;
+
+	pGameInfoObj->m_TimeLimit = 0;
+	if(m_Timer >= 0 && GameServer()->ko_game)
+		pGameInfoObj->m_TimeLimit = std::ceil(g_Config.m_SvKoTimeLimit/60.0);
+
+	pGameInfoObj->m_RoundStartTick = m_RoundStartTick + (g_Config.m_SvKoTimeLimit - pGameInfoObj->m_TimeLimit*60)*50;
+
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
 	pGameInfoObj->m_RoundNum = 0;
