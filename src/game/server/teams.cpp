@@ -723,7 +723,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	char aBuf[128];
 	SetLastTimeCp(Player, -1);
 
-	char bBuf[16] = "new record! ";
+	char bBuf[16] = "New record! ";
 	
 	bool newRecord = false;
 	if(world_record > Time)
@@ -739,7 +739,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		Server()->ClientName(ClientId), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
 	
-	if((g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores) && !newRecord && !GameServer()->ko_game)
+	if((g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores || !GameServer()->ko_game) && !newRecord)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
 	else
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);
@@ -758,7 +758,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		else
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 				Diff);
-		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores || !GameServer()->ko_game)
 			GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
 		else
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
