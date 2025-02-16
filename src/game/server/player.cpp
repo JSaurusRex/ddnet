@@ -451,8 +451,18 @@ void CPlayer::Snap(int SnappingClient)
 			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(id);
 			if(!pSpectatorInfo)
 				return;
-
+			
 			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
+
+			if(m_SpectatorId != SPEC_FREEVIEW)
+			{
+				int id_s = m_SpectatorId;
+				if(Server()->Translate(id_s, SnappingClient))
+					pSpectatorInfo->m_SpectatorId = id_s;
+				else
+					m_SpectatorId = SPEC_FREEVIEW;
+			}
+
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
 		}
@@ -464,6 +474,16 @@ void CPlayer::Snap(int SnappingClient)
 
 			pSpectatorInfo->m_SpecMode = m_SpectatorId == SPEC_FREEVIEW ? protocol7::SPEC_FREEVIEW : protocol7::SPEC_PLAYER;
 			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
+
+			if(m_SpectatorId != SPEC_FREEVIEW)
+			{
+				int id_s = m_SpectatorId;
+				if(Server()->Translate(id_s, SnappingClient))
+					pSpectatorInfo->m_SpectatorId = id_s;
+				else
+					m_SpectatorId = SPEC_FREEVIEW;
+			}
+
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
 		}
