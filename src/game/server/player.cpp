@@ -56,6 +56,7 @@ void CPlayer::Reset()
 	m_ko_round = 0;
 	m_elimination = -1;
 	m_ko_fastest_round = -1;
+	m_ko_wins = 0;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);
 	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)

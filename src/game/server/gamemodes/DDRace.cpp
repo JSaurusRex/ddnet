@@ -18,6 +18,9 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+
+	if(g_Config.m_SvKoBo3)
+		m_pGameType = "KO-Run";
 	m_GameFlags = protocol7::GAMEFLAG_RACE;
 }
 
@@ -27,9 +30,10 @@ CScore *CGameControllerDDRace::Score()
 {
 	return GameServer()->Score();
 }
-
+static bool has_finished = false;
 void CGameControllerDDRace::KO_Start()
 {
+	has_finished = false;
 	bool finished = (GameServer()->ko_player_count <= 1);
 	if(finished)
 	{
@@ -58,6 +62,62 @@ void CGameControllerDDRace::KO_Start()
 		GameServer()->ko_game = false;
 		GameServer()->ko_round = 0;
 		return;
+	}
+
+	if(g_Config.m_SvKoBo3)
+	{
+		int wins = -1;
+		GameServer()->ko_player_count = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->PlayerExists(i))
+				continue;
+			
+			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+				continue;
+
+			GameServer()->ko_player_count++;
+
+			if(GameServer()->m_apPlayers[i]->m_player_eliminated)
+				continue;
+
+			wins = GameServer()->m_apPlayers[i]->m_ko_wins;
+
+			if(wins >= 2)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
+				GameServer()->SendBroadcast(aBuf, -1, true);
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			}
+		}
+
+		char aBuf[256];
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!GameServer()->PlayerExists(i))
+			{
+				continue;
+			}
+
+			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+				continue;
+			
+			GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
+			GameServer()->m_apPlayers[i]->m_player_eliminated = false;
+
+			str_format(aBuf, sizeof(aBuf), "%s : %i", Server()->ClientName(i), GameServer()->m_apPlayers[i]->m_ko_wins);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		}
+
+		if(wins >= 2)
+		{
+			GameServer()->ko_game = false;
+			GameServer()->ko_round = 0;
+			GameServer()->ko_player_count = 0;
+			g_Config.m_SvSpectatorSlots = 0;
+			return;
+		}
 	}
 
 	m_RoundStartTick = Server()->Tick();
@@ -217,34 +277,64 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 		pPlayer->KillCharacter(WEAPON_GAME, false);
 
-		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
-		{			
-			str_format(aBuf, sizeof(aBuf), "%s Wins!", Server()->ClientName(pPlayer->GetCid()));
-			pPlayer->m_elimination = -2;
-			GameServer()->SendBroadcast(aBuf, -1, true);
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
-
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(!GameServer()->PlayerExists(i) || i == pPlayer->GetCid())
-				{
-					continue;
-				}
-				
-				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
-				if(GameServer()->m_apPlayers[i]->m_player_eliminated)
-				{
-					str_format(aBuf, sizeof(aBuf), "you survived until round %i!", GameServer()->m_apPlayers[i]->m_ko_round);
-					GameServer()->SendChatTarget(i, aBuf);
-					continue;
-				}
-			}
-
-			GameServer()->ko_game = false;
-		}else
+		if(!has_finished)
 		{
-			str_format(aBuf, sizeof(aBuf), "%i spots left!", GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-GameServer()->ko_players_finished);
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			pPlayer->m_ko_wins++;
+			has_finished = true;
+		}
+
+		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
+		{
+			if(pPlayer->m_ko_wins < 2 && g_Config.m_SvKoBo3)
+			{
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(!GameServer()->PlayerExists(i))
+					{
+						continue;
+					}
+
+					if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+						continue;
+					
+					GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
+					GameServer()->m_apPlayers[i]->m_player_eliminated = false;
+
+					str_format(aBuf, sizeof(aBuf), "%s : %i", Server()->ClientName(i), GameServer()->m_apPlayers[i]->m_ko_wins);
+					GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+				}
+			}else
+			{
+				str_format(aBuf, sizeof(aBuf), "%s Wins!", Server()->ClientName(pPlayer->GetCid()));
+				pPlayer->m_elimination = -2;
+				GameServer()->SendBroadcast(aBuf, -1, true);
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(!GameServer()->PlayerExists(i) || i == pPlayer->GetCid())
+					{
+						continue;
+					}
+					
+					GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_WORLD);
+					if(GameServer()->m_apPlayers[i]->m_player_eliminated && !g_Config.m_SvKoBo3)
+					{
+						str_format(aBuf, sizeof(aBuf), "you survived until round %i!", GameServer()->m_apPlayers[i]->m_ko_round);
+						GameServer()->SendChatTarget(i, aBuf);
+						continue;
+					}
+				}
+
+				GameServer()->ko_game = false;
+			}
+		}else if(!g_Config.m_SvKoBo3)
+		{
+			if(GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-GameServer()->ko_players_finished >= 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "%i spots left!", GameServer()->ko_player_count-GameServer()->ko_players_tobe_eliminated-GameServer()->ko_players_finished);
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			}
 		}
 	}
 
@@ -373,7 +463,9 @@ void CGameControllerDDRace::Tick()
 
 		if(playersIn < 1)
 		{
-			m_Warmup = 10 * Server()->TickSpeed();
+			m_Warmup = 5 * Server()->TickSpeed();
+			if(!g_Config.m_SvKoBo3)
+				m_Warmup = 10 * Server()->TickSpeed();
 			m_Timer = 1;
 		}
 	}

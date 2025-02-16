@@ -93,6 +93,7 @@ public:
 	int m_ko_round;
 	int m_ko_round_timer;
 	int m_ko_fastest_round;
+	int m_ko_wins;
 
 	//
 	int m_Vote;

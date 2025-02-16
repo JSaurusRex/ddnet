@@ -657,6 +657,7 @@ MACRO_CONFIG_STR(SvBannedVersions, sv_banned_versions, 128, "", CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvKoEliminations, sv_ko_eliminations, 1, 1, 20, CFGFLAG_SERVER, "Amount of eliminations per round (KO GAME)")
 MACRO_CONFIG_INT(SvKoTimeLimit, sv_ko_time_limit, 20, 1, 99999, CFGFLAG_SERVER, "time limit of 1 round, applies next round (KO GAME)")
 MACRO_CONFIG_INT(SvKoPublicChat, sv_ko_public_chat, 0, 0, 1, CFGFLAG_SERVER, "make players able to publicly chat during the game (KO GAME)")
+MACRO_CONFIG_INT(SvKoBo3, sv_ko_bo3, 0, 0, 1, CFGFLAG_SERVER, "Best of 3 wins (KO GAME)")
 MACRO_CONFIG_INT(SvForcePredictionMargin, sv_force_prediction_margin, 0, 0, 200, CFGFLAG_SERVER, "force players to have a higher prediction margin for more consistant gameplay")
 
 // netlimit

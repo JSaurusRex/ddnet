@@ -1011,9 +1011,12 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	if(m_pPlayer->m_player_eliminated && GameServer()->ko_game)
 	{
 		m_pPlayer->m_ko_round = GameServer()->ko_round;
-		str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(m_Core.m_Id));
-		GameServer()->SendBroadcast("You are eliminated!", m_pPlayer->GetCid(), true);
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		if(!g_Config.m_SvKoBo3)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s is eliminated!", Server()->ClientName(m_Core.m_Id));
+			GameServer()->SendBroadcast("You are eliminated!", m_pPlayer->GetCid(), true);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		}
 		GameServer()->ko_players_eliminated++;
 		m_pPlayer->m_elimination = GameServer()->ko_players_eliminated;
 	}

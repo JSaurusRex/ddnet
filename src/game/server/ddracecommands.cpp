@@ -81,7 +81,38 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 	
-	int time = pResult->GetInteger(0);
+	int time = 200;
+	
+	if(!g_Config.m_SvKoBo3)
+	{
+		if(pResult->NumArguments() == 0)
+			return;
+		time = pResult->GetInteger(0);
+	}
+	else
+	{
+		int playerCount = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!pSelf->PlayerExists(i))
+			{
+				continue;
+			}
+
+			if(pSelf->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+				continue;
+			
+			playerCount++;	
+		}
+
+		if(playerCount < 2)
+		{
+			pSelf->SendChat(-1, TEAM_ALL, "Not enough players in game");
+			return;
+		}
+
+		g_Config.m_SvSpectatorSlots = g_Config.m_SvMaxClients - playerCount;
+	}
 	
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -95,6 +126,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 		
 		pSelf->m_apPlayers[i]->m_player_eliminated = false;
 		pSelf->m_apPlayers[i]->m_elimination = -1;
+		pSelf->m_apPlayers[i]->m_ko_wins = 0;
 		pSelf->m_apPlayers[i]->KillCharacter();
 	}
 
