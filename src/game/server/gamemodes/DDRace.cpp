@@ -11,6 +11,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
+#include <engine/shared/json.h>
+#include <engine/shared/http.h>
+
 #define GAME_TYPE_NAME "COTD"
 #define TEST_TYPE_NAME "COTD"
 
@@ -119,6 +122,7 @@ void CGameControllerDDRace::KO_Start()
 			GameServer()->ko_round = 0;
 			GameServer()->ko_player_count = 0;
 			g_Config.m_SvSpectatorSlots = 0;
+			SendWebhook();
 			return;
 		}
 	}
@@ -196,6 +200,75 @@ void CGameControllerDDRace::KO_Start()
 
 
 	m_Timer = g_Config.m_SvKoTimeLimit*Server()->TickSpeed();
+}
+
+void CGameControllerDDRace::SendWebhook()
+{
+	if(g_Config.m_SvRoundStatsDiscordWebhooks[0] == '\0')
+		return;
+	
+	char aStats[16384];
+
+	//write json object
+
+	CJsonStringWriter Writer;
+	Writer.BeginObject();
+	{
+		Writer.WriteAttribute("server");
+		Writer.WriteStrValue(g_Config.m_SvName);
+		Writer.WriteAttribute("map");
+		Writer.WriteStrValue(g_Config.m_SvMap);
+		Writer.WriteAttribute("game_type");
+		Writer.WriteStrValue("cotd_bo3");
+
+		Writer.WriteAttribute("players");
+		Writer.BeginArray();
+		for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+				continue;
+
+			Writer.BeginObject();
+			Writer.WriteAttribute("id");
+			Writer.WriteIntValue(pPlayer->GetCid());
+			Writer.WriteAttribute("name");
+			Writer.WriteStrValue(Server()->ClientName(pPlayer->GetCid()));
+			Writer.WriteAttribute("win");
+			Writer.WriteIntValue(pPlayer->m_ko_wins == 2);
+			Writer.WriteAttribute("rounds");
+			Writer.WriteIntValue(pPlayer->m_ko_round);
+			Writer.EndObject();
+		}
+		Writer.EndArray();
+	}
+	Writer.EndObject();
+	str_copy(aStats, Writer.GetOutputString().c_str(), sizeof(aStats));
+
+	const char *pUrls = g_Config.m_SvRoundStatsDiscordWebhooks;
+	char aPayload[4048];
+	char aStatsStr[4000];
+	str_format(
+		aPayload,
+		sizeof(aPayload),
+		"{\"allowed_mentions\": {\"parse\": []}, \"content\": \"%s\"}",
+		EscapeJson(aStatsStr, sizeof(aStatsStr), aStats));
+	const int PayloadSize = str_length(aPayload);
+	char aUrl[1024];
+
+	while((pUrls = str_next_token(pUrls, ",", aUrl, sizeof(aUrl))))
+	{
+		// TODO: use HttpPostJson()
+		std::shared_ptr<CHttpRequest> pDiscord = HttpPost(aUrl, (const unsigned char *)aPayload, PayloadSize);
+		pDiscord->LogProgress(HTTPLOG::FAILURE);
+		pDiscord->IpResolve(IPRESOLVE::V4);
+		pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
+		pDiscord->HeaderString("Content-Type", "application/json");
+		GameServer()->m_pHttp->Run(pDiscord);
+	}
+
+	dbg_msg("ddnet-insta", "publishing round stats to discord:\n%s", aStats);
 }
 
 void CGameControllerDDRace::SaveCOTD()
@@ -395,6 +468,14 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 				if(!g_Config.m_SvKoBo3)
 					SaveCOTD();
+				else
+				{
+					g_Config.m_SvSpectatorSlots = 0;
+					SendWebhook();
+				}
+
+				GameServer()->ko_round = 0;
+				GameServer()->ko_player_count = 0;
 				GameServer()->ko_game = false;
 			}
 		}else if(!g_Config.m_SvKoBo3)

@@ -26,6 +26,7 @@ public:
 
 	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
 
+	void SendWebhook();
 	void SaveCOTD();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

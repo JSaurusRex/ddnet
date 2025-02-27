@@ -660,6 +660,8 @@ MACRO_CONFIG_INT(SvKoPublicChat, sv_ko_public_chat, 0, 0, 1, CFGFLAG_SERVER, "ma
 MACRO_CONFIG_INT(SvKoBo3, sv_ko_bo3, 0, 0, 1, CFGFLAG_SERVER, "Best of 3 wins (KO GAME)")
 MACRO_CONFIG_INT(SvForcePredictionMargin, sv_force_prediction_margin, 0, 0, 200, CFGFLAG_SERVER, "force players to have a higher prediction margin for more consistant gameplay")
 
+MACRO_CONFIG_STR(SvRoundStatsDiscordWebhooks, sv_round_stats_discord_webhooks, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end. Is JSON")
+
 // netlimit
 MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit: Maximum amount of traffic a client is allowed to use (in kb/s)")
 MACRO_CONFIG_INT(SvNetlimitAlpha, sv_netlimit_alpha, 50, 1, 100, CFGFLAG_SERVER, "Netlimit: Alpha of Exponention moving average")

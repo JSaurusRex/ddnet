@@ -19,6 +19,8 @@
 #include <memory>
 #include <string>
 
+#include <engine/shared/http.h>
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -381,6 +383,8 @@ public:
 	void ReadCensorList();
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
+
+	IHttp * m_pHttp;
 
 private:
 	// starting 1 to make 0 the special value "no client id"
