@@ -248,8 +248,13 @@ void CServer::SetClientSlots(int ClientId)
 	if(IsSixup(ClientId))
 		MaxClientsSlots = 16;
 	
+	if(GetClientVersion(ClientId) < VERSION_DDNET_128_PLAYERS)
+		MaxClientsSlots = MAX_CLIENTS_PER_CLIENT_OLD;
+	
 	if(GetClientVersion(ClientId) < VERSION_DDNET_OLD)
 		MaxClientsSlots = 16;
+	
+
 
 	//calculate client score
 	m_aClients[ClientId].m_StaticClientScore = GameServer()->GiveStaticClientClientScore(ClientId);
