@@ -59,6 +59,9 @@ void CGameControllerDDRace::KO_Start()
 			GameServer()->m_apPlayers[i]->m_elimination = -2;
 		}
 		m_Warmup = 10 * Server()->TickSpeed();
+
+		if(!g_Config.m_SvKoBo3)
+			SaveCOTD();
 		GameServer()->ko_game = false;
 		GameServer()->ko_round = 0;
 		return;
@@ -195,6 +198,70 @@ void CGameControllerDDRace::KO_Start()
 	m_Timer = g_Config.m_SvKoTimeLimit*Server()->TickSpeed();
 }
 
+void CGameControllerDDRace::SaveCOTD()
+{
+	for(int id = 0; id < MAX_CLIENTS; id++)
+	{
+		if(!GameServer()->m_apPlayers[id])
+			continue;
+		
+		if(GameServer()->m_apPlayers[id]->m_elimination == -1)	//didn't participate
+			continue;
+		
+		int rank = GameServer()->ko_players_eliminated - GameServer()->m_apPlayers[id]->m_elimination + 2;
+		if(GameServer()->m_apPlayers[id]->m_elimination == -2)
+			rank = 1;
+		
+		int points = 0;
+		switch(rank)
+		{
+			case 1:
+				points = 30;
+				break;
+			case 2:
+				points = 20;
+				break;
+			case 3:
+				points = 15;
+				break;
+			case 4:
+				points = 10;
+				break;
+			case 5:
+				points = 9;
+				break;
+			case 6:
+				points = 8;
+				break;
+			case 7:
+				points = 7;
+				break;
+			case 8:
+				points = 6;
+				break;
+			case 9:
+				points = 5;
+				break;
+			case 10:
+				points = 4;
+				break;
+			
+			default:
+				float percent =  (GameServer()->m_apPlayers[id]->m_elimination + 2) / GameServer()->ko_players_eliminated;
+				if(percent > 0.80)
+					points = 0;
+				else if(percent > 0.40)
+					points = 2;
+				else	//top 80%
+					points = 1;
+				break;
+		}
+
+		Score()->SaveScore_COTD(id, points, rank);
+	}
+
+}
+
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();
@@ -326,6 +393,8 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 					}
 				}
 
+				if(!g_Config.m_SvKoBo3)
+					SaveCOTD();
 				GameServer()->ko_game = false;
 			}
 		}else if(!g_Config.m_SvKoBo3)

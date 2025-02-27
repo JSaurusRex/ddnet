@@ -25,5 +25,7 @@ public:
 	void Tick() override;
 
 	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
+
+	void SaveCOTD();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

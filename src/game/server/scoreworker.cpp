@@ -817,6 +817,107 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	return false;
 }
 
+bool CScoreWorker::SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlScoreData_COTD *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	// auto *paMessages = pResult->m_Data.m_aaMessages;
+
+	char aBuf[1024];
+
+	if(w == Write::NORMAL)
+	{
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT COUNT(*) AS COTD_FINISH FROM %s_cotd_ranks WHERE Map=? AND Name=? ORDER BY Rank ASC LIMIT 1",
+			pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, pData->m_aName);
+
+		bool End;
+		if(pSqlServer->Step(&End, pError, ErrorSize))
+		{
+			return true;
+		}
+		int NumFinished = pSqlServer->GetInt(1);
+		if(NumFinished == 0)
+		{
+			str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_cotd_ranks(Name, Map, Rank) VALUES(?, ?, %i)",
+			pSqlServer->GetPrefix(), pData->m_Rank);
+
+			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			{
+				return true;
+			}
+
+			pSqlServer->BindString(1, pData->m_aName);
+			pSqlServer->BindString(2, pData->m_aMap);
+
+			int Points = pData->m_Points;
+			if(pSqlServer->AddPoints_COTD(pData->m_aName, Points, pError, ErrorSize))
+			{
+				return true;
+			}
+			// str_format(paMessages[0], sizeof(paMessages[0]),
+			// 	"You earned %d point%s for participating in this cup of the day!",
+			// 	Points, Points == 1 ? "" : "s");
+		}
+	}
+
+	int NumInserted;
+	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CScoreWorker::ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	auto *paMessages = pResult->m_Data.m_aaMessages;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT ("
+		"  SELECT COUNT(Name) + 1 FROM %s_cotd_points WHERE Points > ("
+		"    SELECT Points FROM %s_cotd_points WHERE Name = ?"
+		")) as Ranking, Points, Name "
+		"FROM %s_cotd_points WHERE Name = ?",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aName);
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
+	{
+		int Rank = pSqlServer->GetInt(1);
+		int Count = pSqlServer->GetInt(2);
+		char aName[MAX_NAME_LENGTH];
+		pSqlServer->GetString(3, aName, sizeof(aName));
+		pResult->m_MessageKind = CScorePlayerResult::ALL;
+		str_format(paMessages[0], sizeof(paMessages[0]),
+			"%d. %s COTD Points: %d, requested by %s",
+			Rank, aName, Count, pData->m_aRequestingPlayer);
+	}
+	else
+	{
+		str_format(paMessages[0], sizeof(paMessages[0]),
+			"%s has not collected any cotd points so far", pData->m_aName);
+	}
+	return false;
+}
+
+
 bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);

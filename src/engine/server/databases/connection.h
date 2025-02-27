@@ -87,6 +87,7 @@ public:
 
 	// SQL statements, that can't be abstracted, has side effects to the result
 	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
+	virtual bool AddPoints_COTD(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;
 
 private:
 	char m_aPrefix[64];
@@ -97,6 +98,8 @@ protected:
 	void FormatCreateMaps(char *aBuf, unsigned int BufferSize) const;
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup) const;
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateCOTD_Points(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateCOTD_Ranks(char *aBuf, unsigned int BufferSize) const;
 };
 
 bool MysqlAvailable();

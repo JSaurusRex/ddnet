@@ -141,6 +141,20 @@ void CScore::MapInfo(int ClientId, const char *pMapName)
 	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientId, pMapName, 0);
 }
 
+void CScore::SaveScore_COTD(int ClientId, int Points, int Rank)
+{
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
+	auto Tmp = std::make_unique<CSqlScoreData_COTD>(pCurPlayer->m_ScoreFinishResult);
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
+	Tmp->m_ClientId = ClientId;
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
+	Tmp->m_Rank = Rank;
+	Tmp->m_Points = Points;
+
+	m_pPool->ExecuteWrite(CScoreWorker::SaveCOTD_Points, std::move(Tmp), "save score");
+}
+
 void CScore::SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
@@ -245,7 +259,7 @@ void CScore::ShowPoints(int ClientId, const char *pName)
 {
 	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowPoints, "show points", ClientId, pName, 0);
+	ExecPlayerThread(CScoreWorker::ShowCOTD_Points, "show points", ClientId, pName, 0);
 }
 
 void CScore::ShowTopPoints(int ClientId, int Offset)

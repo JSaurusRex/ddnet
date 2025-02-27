@@ -148,6 +148,27 @@ struct CSqlScoreData : ISqlData
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 };
 
+struct CSqlScoreData_COTD : ISqlData
+{
+	CSqlScoreData_COTD(std::shared_ptr<CScorePlayerResult> pResult) :
+		ISqlData(std::move(pResult))
+	{
+	}
+
+	virtual ~CSqlScoreData_COTD(){};
+
+	char m_aMap[MAX_MAP_LENGTH];
+	char m_aGameUuid[UUID_MAXSTRSIZE];
+	char m_aName[MAX_MAP_LENGTH];
+
+	int m_ClientId;
+	int m_Rank;
+	int m_Points;
+	int m_Num;
+	bool m_Search;
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+};
+
 struct CScoreSaveResult : ISqlResult
 {
 	CScoreSaveResult(int PlayerId) :
@@ -295,6 +316,8 @@ struct CScoreWorker
 	static bool LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);

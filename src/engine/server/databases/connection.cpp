@@ -90,3 +90,26 @@ void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize) cons
 		")",
 		GetPrefix(), MAX_NAME_LENGTH_SQL, BinaryCollate());
 }
+
+void IDbConnection::FormatCreateCOTD_Points(char *aBuf, unsigned int BufferSize) const
+{
+	str_format(aBuf, BufferSize,
+		"CREATE TABLE IF NOT EXISTS %s_cotd_points ("
+		"  Name VARCHAR(%d) COLLATE %s NOT NULL, "
+		"  Points INT DEFAULT 0, "
+		"  PRIMARY KEY (Name)"
+		")",
+		GetPrefix(), MAX_NAME_LENGTH_SQL, BinaryCollate());
+}
+
+void IDbConnection::FormatCreateCOTD_Ranks(char *aBuf, unsigned int BufferSize) const
+{
+	str_format(aBuf, BufferSize,
+		"CREATE TABLE IF NOT EXISTS %s_cotd_ranks ("
+		"  Name VARCHAR(%d) COLLATE %s NOT NULL, "
+		"  Map VARCHAR(128) COLLATE %s NOT NULL, "
+		"  Rank INT DEFAULT 0, "
+		"  PRIMARY KEY (Name)"
+		")",
+		GetPrefix(), MAX_NAME_LENGTH_SQL, BinaryCollate(), BinaryCollate());
+}

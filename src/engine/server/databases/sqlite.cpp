@@ -52,6 +52,7 @@ public:
 	int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) override;
 
 	bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
+	bool AddPoints_COTD(const char *pPlayer, int Points, char *pError, int ErrorSize) override;
 
 	// fail safe
 	bool CreateFailsafeTables();
@@ -163,6 +164,14 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		FormatCreatePoints(aBuf, sizeof(aBuf));
+		if(Execute(aBuf, pError, ErrorSize))
+			return true;
+		
+		FormatCreateCOTD_Points(aBuf, sizeof(aBuf));
+		if(Execute(aBuf, pError, ErrorSize))
+			return true;
+		
+		FormatCreateCOTD_Ranks(aBuf, sizeof(aBuf));
 		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 
@@ -398,6 +407,25 @@ bool CSqliteConnection::AddPoints(const char *pPlayer, int Points, char *pError,
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 		"INSERT INTO %s_points(Name, Points) "
+		"VALUES (?, ?) "
+		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?",
+		GetPrefix());
+	if(PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	BindString(1, pPlayer);
+	BindInt(2, Points);
+	BindInt(3, Points);
+	bool End;
+	return Step(&End, pError, ErrorSize);
+}
+
+bool CSqliteConnection::AddPoints_COTD(const char *pPlayer, int Points, char *pError, int ErrorSize)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"INSERT INTO %s_cotd_points(Name, Points) "
 		"VALUES (?, ?) "
 		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?",
 		GetPrefix());

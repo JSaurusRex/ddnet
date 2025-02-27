@@ -705,6 +705,25 @@ bool CMysqlConnection::AddPoints(const char *pPlayer, int Points, char *pError, 
 	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }
 
+bool CMysqlConnection::AddPoints_COTD(const char *pPlayer, int Points, char *pError, int ErrorSize)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"INSERT INTO %s_cotd_points(Name, Points) "
+		"VALUES (?, ?) "
+		"ON DUPLICATE KEY UPDATE COTD_Points=COTD_Points+?",
+		GetPrefix());
+	if(PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	BindString(1, pPlayer);
+	BindInt(2, Points);
+	BindInt(3, Points);
+	int NumUpdated;
+	return ExecuteUpdate(&NumUpdated, pError, ErrorSize);
+}
+
 std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config)
 {
 	return std::make_unique<CMysqlConnection>(Config);

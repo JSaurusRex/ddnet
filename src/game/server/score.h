@@ -51,6 +51,8 @@ public:
 	void LoadPlayerTimeCp(int ClientId, const char *pName = "");
 	void SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
 
+	void SaveScore_COTD(int ClientId, int Points, int Rank);
+
 	void SaveTeamScore(int Team, int *pClientIds, unsigned int Size, int TimeTicks, const char *pTimestamp);
 
 	void ShowTop(int ClientId, int Offset = 1);
