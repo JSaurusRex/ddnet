@@ -589,6 +589,8 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoObj->m_TimeLimit = std::ceil(g_Config.m_SvKoTimeLimit/60.0);
 
 	pGameInfoObj->m_RoundStartTick = m_RoundStartTick + (g_Config.m_SvKoTimeLimit - pGameInfoObj->m_TimeLimit*60)*50;
+	if(!GameServer()->ko_game)
+		pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
 
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
