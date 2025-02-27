@@ -89,7 +89,7 @@ void CGameControllerDDRace::KO_Start()
 
 			wins = GameServer()->m_apPlayers[i]->m_ko_wins;
 
-			if(wins >= 2)
+			if(wins >= std::floor(g_Config.m_SvKoBo3 / 2.0)+1)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
@@ -116,7 +116,7 @@ void CGameControllerDDRace::KO_Start()
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 
-		if(wins >= 2)
+		if(wins >= std::floor(g_Config.m_SvKoBo3 / 2.0)+1)
 		{
 			GameServer()->ko_game = false;
 			GameServer()->ko_round = 0;
@@ -219,7 +219,10 @@ void CGameControllerDDRace::SendWebhook()
 		Writer.WriteAttribute("map");
 		Writer.WriteStrValue(g_Config.m_SvMap);
 		Writer.WriteAttribute("game_type");
-		Writer.WriteStrValue("cotd_bo3");
+		char str[50];
+		str_format(str, sizeof(str), "cotd_bo%i",
+			g_Config.m_SvKoBo3);
+		Writer.WriteStrValue(str);
 
 		Writer.WriteAttribute("players");
 		Writer.BeginArray();
@@ -236,7 +239,7 @@ void CGameControllerDDRace::SendWebhook()
 			Writer.WriteAttribute("name");
 			Writer.WriteStrValue(Server()->ClientName(pPlayer->GetCid()));
 			Writer.WriteAttribute("win");
-			Writer.WriteIntValue(pPlayer->m_ko_wins == 2);
+			Writer.WriteIntValue(pPlayer->m_ko_wins == std::floor(g_Config.m_SvKoBo3 / 2.0)+1);
 			Writer.WriteAttribute("rounds");
 			Writer.WriteIntValue(pPlayer->m_ko_round);
 			Writer.EndObject();
@@ -425,7 +428,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 		if(GameServer()->ko_player_count <= 2 && GameServer()->ko_players_finished == 1)
 		{
-			if(pPlayer->m_ko_wins < 2 && g_Config.m_SvKoBo3)
+			if(pPlayer->m_ko_wins < std::floor(g_Config.m_SvKoBo3 / 2.0)+1 && g_Config.m_SvKoBo3)
 			{
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
