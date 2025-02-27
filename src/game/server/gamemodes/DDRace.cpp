@@ -162,16 +162,16 @@ void CGameControllerDDRace::KO_Start()
 		pChar->ResetInput();
 		
 
-		Teams().OnCharacterStart(i);
-		pChar->m_StartTime = Server()->Tick();
-		// pChar->m_DDRaceState = DDRACE_STARTED;
+		// Teams().OnCharacterStart(i);
+		// pChar->m_StartTime = Server()->Tick();
+		// // pChar->m_DDRaceState = DDRACE_STARTED;
 
-		pChar->m_LastTimeCp = -1;
-		pChar->m_LastTimeCpBroadcasted = -1;
-		for(float &CurrentTimeCp : pChar->m_aCurrentTimeCp)
-		{
-			CurrentTimeCp = 0.0f;
-		}
+		// pChar->m_LastTimeCp = -1;
+		// pChar->m_LastTimeCpBroadcasted = -1;
+		// for(float &CurrentTimeCp : pChar->m_aCurrentTimeCp)
+		// {
+		// 	CurrentTimeCp = 0.0f;
+		// }
 	}
 
 	if(GameServer()->ko_player_count <= 1)
