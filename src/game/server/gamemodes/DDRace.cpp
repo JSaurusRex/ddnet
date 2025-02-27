@@ -276,6 +276,9 @@ void CGameControllerDDRace::SendWebhook()
 
 void CGameControllerDDRace::SaveCOTD()
 {
+	if(!g_Config.m_SvKoSQL)
+		return;
+	
 	for(int id = 0; id < MAX_CLIENTS; id++)
 	{
 		if(!GameServer()->m_apPlayers[id])
