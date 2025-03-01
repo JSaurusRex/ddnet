@@ -3900,7 +3900,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("save_dry", "", CFGFLAG_SERVER, ConDrySave, this, "Dump the current savestring");
 	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER, ConDumpLog, this, "Show logs of the last i seconds");
 
-	Console()->Register("start", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_TEST, ConKO_Start, this, "Starts game");
+	Console()->Register("start", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConKO_Start, this, "Starts game");
 
 
 	Console()->Register("freezehammer", "v[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConFreezeHammer, this, "Gives a player Freeze Hammer");
