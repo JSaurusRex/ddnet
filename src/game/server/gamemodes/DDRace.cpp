@@ -38,6 +38,10 @@ void CGameControllerDDRace::KO_Start()
 {
 	has_finished = false;
 	bool finished = (GameServer()->ko_player_count <= 1);
+
+	if(GameServer()->ko_round >= g_Config.m_SvKoBo3)
+		finished = true;
+
 	if(finished)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
