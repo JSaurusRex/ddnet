@@ -591,10 +591,13 @@ void CGameControllerDDRace::Tick()
 	}
 	
 	int playersIn = 0;
+	int players = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!GameServer()->PlayerExists(i) || GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 			continue;
+		
+		players++;
 
 		if(GameServer()->m_apPlayers[i]->m_player_eliminated || !GameServer()->m_apPlayers[i]->GetCharacter())
 		{
@@ -604,6 +607,16 @@ void CGameControllerDDRace::Tick()
 		playersIn++;
 	}
 
+	if(players == 0)
+	{
+		//no players so stop the game
+		if(g_Config.m_SvKoBo3)
+			g_Config.m_SvSpectatorSlots = 0;
+		
+		GameServer()->ko_game = false;
+		GameServer()->ko_round = 0;
+		GameServer()->ko_player_count = 0;
+	}
 
 	if(playersIn <= GameServer()->ko_players_tobe_eliminated && m_Warmup <= 0 && GameServer()->ko_game)
 	{
