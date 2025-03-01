@@ -89,6 +89,11 @@ void CGameControllerDDRace::KO_Start()
 
 		if(!g_Config.m_SvKoBo3)
 			SaveCOTD();
+		else
+		{
+			SendWebhook();
+			g_Config.m_SvSpectatorSlots = 0;
+		}
 		GameServer()->ko_game = false;
 		GameServer()->ko_round = 0;
 		return;
