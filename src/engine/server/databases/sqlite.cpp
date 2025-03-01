@@ -4,6 +4,7 @@
 
 #include <base/math.h>
 #include <engine/console.h>
+#include <engine/shared/config.h>
 
 #include <atomic>
 
@@ -166,12 +167,20 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 		FormatCreatePoints(aBuf, sizeof(aBuf));
 		if(Execute(aBuf, pError, ErrorSize))
 			return true;
-		
-		FormatCreateCOTD_Points(aBuf, sizeof(aBuf));
+				
+		FormatCreateCOTD_Points(aBuf, sizeof(aBuf), "race");
 		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 		
-		FormatCreateCOTD_Ranks(aBuf, sizeof(aBuf));
+		FormatCreateCOTD_Points(aBuf, sizeof(aBuf), "gores");
+		if(Execute(aBuf, pError, ErrorSize))
+			return true;
+		
+		FormatCreateCOTD_Ranks(aBuf, sizeof(aBuf), "race");
+		if(Execute(aBuf, pError, ErrorSize))
+			return true;
+		
+		FormatCreateCOTD_Ranks(aBuf, sizeof(aBuf), "gores");
 		if(Execute(aBuf, pError, ErrorSize))
 			return true;
 
@@ -425,10 +434,10 @@ bool CSqliteConnection::AddPoints_COTD(const char *pPlayer, int Points, char *pE
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
-		"INSERT INTO %s_cotd_points(Name, Points) "
+		"INSERT INTO %s_cotd_points_%s(Name, Points) "
 		"VALUES (?, ?) "
 		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?",
-		GetPrefix());
+		GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
 	if(PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;

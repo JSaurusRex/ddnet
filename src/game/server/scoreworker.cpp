@@ -828,8 +828,8 @@ bool CScoreWorker::SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 	if(w == Write::NORMAL)
 	{
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT COUNT(*) AS COTD_FINISH FROM %s_cotd_ranks WHERE Map=? AND Name=? ORDER BY Rank ASC LIMIT 1",
-			pSqlServer->GetPrefix());
+			"SELECT COUNT(*) AS COTD_FINISH FROM %s_cotd_ranks_%s WHERE Map=? AND Name=? ORDER BY Rank ASC LIMIT 1",
+			pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return true;
@@ -846,8 +846,8 @@ bool CScoreWorker::SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 		if(NumFinished == 0)
 		{
 			str_format(aBuf, sizeof(aBuf),
-			"INSERT INTO %s_cotd_ranks(Name, Map, Rank) VALUES(?, ?, %i)",
-			pSqlServer->GetPrefix(), pData->m_Rank);
+			"INSERT INTO %s_cotd_ranks_%s(Name, Map, Rank) VALUES(?, ?, %i)",
+			pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race", pData->m_Rank);
 
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
@@ -881,11 +881,13 @@ bool CScoreWorker::ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT ("
-		"  SELECT COUNT(Name) + 1 FROM %s_cotd_points WHERE Points > ("
-		"    SELECT Points FROM %s_cotd_points WHERE Name = ?"
+		"  SELECT COUNT(Name) + 1 FROM %s_cotd_points_%s WHERE Points > ("
+		"    SELECT Points FROM %s_cotd_points_%s WHERE Name = ?"
 		")) as Ranking, Points, Name "
-		"FROM %s_cotd_points WHERE Name = ?",
-		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		"FROM %s_cotd_points_%s WHERE Name = ?",
+		pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race", pSqlServer->GetPrefix(),
+		g_Config.m_SvKoMode == 0 ? "gores" : "race", pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
+	
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
@@ -906,13 +908,13 @@ bool CScoreWorker::ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 		pSqlServer->GetString(3, aName, sizeof(aName));
 		pResult->m_MessageKind = CScorePlayerResult::ALL;
 		str_format(paMessages[0], sizeof(paMessages[0]),
-			"%d. %s COTD Points: %d, requested by %s",
-			Rank, aName, Count, pData->m_aRequestingPlayer);
+			"%d. %s COTD %s Points: %d, requested by %s",
+			Rank, aName, g_Config.m_SvKoMode == 0 ? "gores" : "race", Count, pData->m_aRequestingPlayer);
 	}
 	else
 	{
 		str_format(paMessages[0], sizeof(paMessages[0]),
-			"%s has not collected any cotd points so far", pData->m_aName);
+			"%s has not collected any cotd %s points so far", pData->m_aName, g_Config.m_SvKoMode == 0 ? "gores" : "race");
 	}
 	return false;
 }

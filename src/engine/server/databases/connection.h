@@ -98,8 +98,8 @@ protected:
 	void FormatCreateMaps(char *aBuf, unsigned int BufferSize) const;
 	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup) const;
 	void FormatCreatePoints(char *aBuf, unsigned int BufferSize) const;
-	void FormatCreateCOTD_Points(char *aBuf, unsigned int BufferSize) const;
-	void FormatCreateCOTD_Ranks(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateCOTD_Points(char *aBuf, unsigned int BufferSize, const char * mode) const;
+	void FormatCreateCOTD_Ranks(char *aBuf, unsigned int BufferSize, const char * mode) const;
 };
 
 bool MysqlAvailable();
