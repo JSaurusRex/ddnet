@@ -40,10 +40,15 @@ void CGameControllerDDRace::KO_Start()
 	bool finished = (GameServer()->ko_player_count <= 1);
 
 	if(GameServer()->ko_round >= g_Config.m_SvKoBo3)
+	{
+		GameServer()->SendChat(-1, TEAM_ALL, "Ran out of rounds");
 		finished = true;
+	}
 
 	if(finished)
 	{
+		int highestId = -1;
+		int highestWins = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(!GameServer()->PlayerExists(i))
@@ -51,9 +56,15 @@ void CGameControllerDDRace::KO_Start()
 			
 			if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 				continue;
+			
+			if(highestWins < GameServer()->m_apPlayers[i]->m_ko_wins)
+			{
+				highestWins = GameServer()->m_apPlayers[i]->m_ko_wins;
+				highestId = i;
+			}
 
 			char aBuf[256];
-			if(GameServer()->m_apPlayers[i]->m_player_eliminated)
+			if(GameServer()->m_apPlayers[i]->m_player_eliminated && !g_Config.m_SvKoBo3)
 			{
 				str_format(aBuf, sizeof(aBuf), "you survived until round %i!", GameServer()->m_apPlayers[i]->m_ko_round);
 				GameServer()->SendChatTarget(i, aBuf);
@@ -61,11 +72,20 @@ void CGameControllerDDRace::KO_Start()
 			}
 
 			str_format(aBuf, sizeof(aBuf), "%s wins!", Server()->ClientName(i));
-			GameServer()->SendBroadcast(aBuf, -1, true);
 
-			GameServer()->m_apPlayers[i]->m_elimination = -2;
+			if(!g_Config.m_SvKoBo3)
+				GameServer()->SendBroadcast(aBuf, -1, true);
 		}
 		m_Warmup = 10 * Server()->TickSpeed();
+
+		if(highestId != -1 && g_Config.m_SvKoBo3)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s wins with %i!", Server()->ClientName(highestId), highestWins);
+			GameServer()->SendBroadcast(aBuf, -1, true);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			GameServer()->m_apPlayers[highestId]->m_elimination = -2;
+		}
 
 		if(!g_Config.m_SvKoBo3)
 			SaveCOTD();
