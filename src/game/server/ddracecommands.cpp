@@ -78,8 +78,8 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
+	// if(!CheckClientId(pResult->m_ClientId))
+		// return;
 	
 	int time = 200;
 	
@@ -91,6 +91,9 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
+		if(pResult->m_ClientId > 0 && (!pSelf->m_apPlayers[pResult->m_ClientId] || pSelf->m_apPlayers[pResult->m_ClientId]->GetTeam() == TEAM_SPECTATORS))
+			return;
+		
 		int playerCount = 0;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
