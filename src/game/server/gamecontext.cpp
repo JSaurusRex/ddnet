@@ -624,6 +624,12 @@ void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, c
 	// check if a vote is already running
 	if(m_VoteCloseTime)
 		return;
+	
+	if(!m_apPlayers[ClientId])
+		return;
+	
+	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorsCanVote)
+		return;
 
 	int64_t Now = Server()->Tick();
 	CPlayer *pPlayer = m_apPlayers[ClientId];
@@ -1266,6 +1272,9 @@ void CGameContext::OnTick()
 
 					// connecting clients with spoofed ips can clog slots without being ingame
 					if(!Server()->ClientIngame(i))
+						continue;
+					
+					if(!g_Config.m_SvSpectatorsCanVote && m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 						continue;
 
 					// don't count votes by blacklisted clients
@@ -2366,6 +2375,9 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 {
 	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
+		return;
+	
+	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorsCanVote)
 		return;
 
 	m_apPlayers[ClientId]->UpdatePlaytime();
