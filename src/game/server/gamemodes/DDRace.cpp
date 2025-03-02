@@ -92,10 +92,13 @@ void CGameControllerDDRace::KO_Start()
 		else
 		{
 			SendWebhook();
-			g_Config.m_SvSpectatorSlots = 0;
+
+			if(g_Config.m_SvKoSetSlots)
+				g_Config.m_SvSpectatorSlots = 0;
 		}
 		GameServer()->ko_game = false;
 		GameServer()->ko_round = 0;
+		GameServer()->ko_player_count = 0;
 		return;
 	}
 
@@ -150,7 +153,9 @@ void CGameControllerDDRace::KO_Start()
 			GameServer()->ko_game = false;
 			GameServer()->ko_round = 0;
 			GameServer()->ko_player_count = 0;
-			g_Config.m_SvSpectatorSlots = 0;
+
+			if(g_Config.m_SvKoSetSlots)
+				g_Config.m_SvSpectatorSlots = 0;
 			SendWebhook();
 			return;
 		}
@@ -505,7 +510,8 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 					SaveCOTD();
 				else
 				{
-					g_Config.m_SvSpectatorSlots = 0;
+					if(g_Config.m_SvKoSetSlots)
+						g_Config.m_SvSpectatorSlots = 0;
 					SendWebhook();
 				}
 
@@ -635,7 +641,7 @@ void CGameControllerDDRace::Tick()
 	if(players == 0)
 	{
 		//no players so stop the game
-		if(g_Config.m_SvKoBo3)
+		if(g_Config.m_SvKoBo3 && g_Config.m_SvKoSetSlots)
 			g_Config.m_SvSpectatorSlots = 0;
 		
 		GameServer()->ko_game = false;

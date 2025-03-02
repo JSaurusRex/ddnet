@@ -114,7 +114,8 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		g_Config.m_SvSpectatorSlots = g_Config.m_SvMaxClients - playerCount;
+		if(g_Config.m_SvKoSetSlots)
+			g_Config.m_SvSpectatorSlots = g_Config.m_SvMaxClients - playerCount;
 	}
 	
 	for(int i = 0; i < MAX_CLIENTS; i++)

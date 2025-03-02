@@ -662,6 +662,7 @@ MACRO_CONFIG_INT(SvKoBo3, sv_ko_bo3, 0, 0, 5, CFGFLAG_SERVER, "Best of X wins (K
 MACRO_CONFIG_INT(SvForcePredictionMargin, sv_force_prediction_margin, 0, 0, 200, CFGFLAG_SERVER, "force players to have a higher prediction margin for more consistant gameplay")
 MACRO_CONFIG_INT(SvKoSQL, sv_ko_sql, 0, 0, 1, CFGFLAG_SERVER, "Save result of cup of the day in database")
 MACRO_CONFIG_INT(SvKoMode, sv_ko_mode, 0, 0, 1, CFGFLAG_SERVER, "Cup of the day Mode: 0 = gores, 1 = race")
+MACRO_CONFIG_INT(SvKoSetSlots, sv_ko_set_slots, 0, 0, 1, CFGFLAG_SERVER, "If slots are automatically set & unset by server")
 
 
 MACRO_CONFIG_STR(SvRoundStatsDiscordWebhooks, sv_round_stats_discord_webhooks, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end. Is JSON")
