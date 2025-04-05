@@ -83,7 +83,7 @@ void CGameContext::ConKO_Start(IConsole::IResult *pResult, void *pUserData)
 	
 	int time = 200;
 	
-	if(!g_Config.m_SvKoBo3)
+	if(!g_Config.m_SvKoFirstTo)
 	{
 		if(pResult->NumArguments() == 0)
 			return;
