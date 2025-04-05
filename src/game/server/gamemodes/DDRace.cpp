@@ -39,7 +39,7 @@ void CGameControllerDDRace::KO_Start()
 	has_finished = false;
 	bool finished = (GameServer()->ko_player_count <= 1);
 
-	if(GameServer()->ko_round >= g_Config.m_SvKoFirstTo*3)
+	if(g_Config.m_SvKoFirstTo && GameServer()->ko_round >= g_Config.m_SvKoFirstTo*3)
 	{
 		GameServer()->SendChat(-1, TEAM_ALL, "Ran out of rounds");
 		finished = true;

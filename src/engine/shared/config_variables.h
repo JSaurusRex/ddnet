@@ -661,7 +661,7 @@ MACRO_CONFIG_INT(SvKoPublicChat, sv_ko_public_chat, 0, 0, 1, CFGFLAG_SERVER, "ma
 MACRO_CONFIG_INT(SvKoFirstTo, sv_ko_first_to, 0, 0, 5, CFGFLAG_SERVER, "Activates ko-run mode, first to X wins the game (KO GAME)")
 MACRO_CONFIG_INT(SvForcePredictionMargin, sv_force_prediction_margin, 0, 0, 200, CFGFLAG_SERVER, "force players to have a higher prediction margin for more consistant gameplay")
 MACRO_CONFIG_INT(SvKoSQL, sv_ko_sql, 0, 0, 1, CFGFLAG_SERVER, "Save result of cup of the day in database")
-MACRO_CONFIG_INT(SvKoMode, sv_ko_mode, 0, 0, 1, CFGFLAG_SERVER, "Cup of the day Mode: 0 = gores, 1 = race")
+MACRO_CONFIG_STR(SvKoMode, sv_ko_mode, 128, "race", CFGFLAG_SERVER, "Cup of the day Mode, example usage: sv_ko_mode race")
 MACRO_CONFIG_INT(SvKoSetSlots, sv_ko_set_slots, 0, 0, 1, CFGFLAG_SERVER, "If slots are automatically set & unset by server")
 
 

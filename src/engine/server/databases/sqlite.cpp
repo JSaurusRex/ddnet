@@ -437,7 +437,7 @@ bool CSqliteConnection::AddPoints_COTD(const char *pPlayer, int Points, char *pE
 		"INSERT INTO %s_cotd_points_%s(Name, Points) "
 		"VALUES (?, ?) "
 		"ON CONFLICT(Name) DO UPDATE SET Points=Points+?",
-		GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
+		GetPrefix(), g_Config.m_SvKoMode);
 	if(PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;

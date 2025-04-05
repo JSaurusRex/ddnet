@@ -829,7 +829,7 @@ bool CScoreWorker::SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT COUNT(*) AS COTD_FINISH FROM %s_cotd_ranks_%s WHERE Map=? AND Name=? ORDER BY Rank ASC LIMIT 1",
-			pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
+			pSqlServer->GetPrefix(), g_Config.m_SvKoMode);
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return true;
@@ -847,7 +847,7 @@ bool CScoreWorker::SaveCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 		{
 			str_format(aBuf, sizeof(aBuf),
 			"INSERT INTO %s_cotd_ranks_%s(Name, Map, Rank) VALUES(?, ?, %i)",
-			pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race", pData->m_Rank);
+			pSqlServer->GetPrefix(), g_Config.m_SvKoMode, pData->m_Rank);
 
 			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
@@ -885,8 +885,8 @@ bool CScoreWorker::ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 		"    SELECT Points FROM %s_cotd_points_%s WHERE Name = ?"
 		")) as Ranking, Points, Name "
 		"FROM %s_cotd_points_%s WHERE Name = ?",
-		pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race", pSqlServer->GetPrefix(),
-		g_Config.m_SvKoMode == 0 ? "gores" : "race", pSqlServer->GetPrefix(), g_Config.m_SvKoMode == 0 ? "gores" : "race");
+		pSqlServer->GetPrefix(), g_Config.m_SvKoMode, pSqlServer->GetPrefix(),
+		g_Config.m_SvKoMode, pSqlServer->GetPrefix(), g_Config.m_SvKoMode);
 	
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -909,12 +909,12 @@ bool CScoreWorker::ShowCOTD_Points(IDbConnection *pSqlServer, const ISqlData *pG
 		pResult->m_MessageKind = CScorePlayerResult::ALL;
 		str_format(paMessages[0], sizeof(paMessages[0]),
 			"%d. %s COTD %s Points: %d, requested by %s",
-			Rank, aName, g_Config.m_SvKoMode == 0 ? "gores" : "race", Count, pData->m_aRequestingPlayer);
+			Rank, aName, g_Config.m_SvKoMode, Count, pData->m_aRequestingPlayer);
 	}
 	else
 	{
 		str_format(paMessages[0], sizeof(paMessages[0]),
-			"%s has not collected any cotd %s points so far", pData->m_aName, g_Config.m_SvKoMode == 0 ? "gores" : "race");
+			"%s has not collected any cotd %s points so far", pData->m_aName, g_Config.m_SvKoMode);
 	}
 	return false;
 }
