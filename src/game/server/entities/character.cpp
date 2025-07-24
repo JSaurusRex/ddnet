@@ -365,6 +365,7 @@ void CCharacter::HandleNinja()
 
 void CCharacter::DoWeaponSwitch()
 {
+	return;
 	// make sure we can switch
 	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
@@ -433,7 +434,7 @@ void CCharacter::FireWeapon()
 
 	DoWeaponSwitch();
 	vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
-	vec2 Direction = normalize(MouseTarget);
+	vec2 Direction = vec2(sin(m_Core.m_Angle), cos(m_Core.m_Angle));
 
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
@@ -764,7 +765,8 @@ void CCharacter::PreTick()
 	Antibot()->OnCharacterTick(m_pPlayer->GetCid());
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true, !g_Config.m_SvNoWeakHook);
+	if(GameServer()->m_CountDown < 0)
+		m_Core.Tick(true, !g_Config.m_SvNoWeakHook);
 }
 
 void CCharacter::Tick()
@@ -774,7 +776,8 @@ void CCharacter::Tick()
 		if(m_Paused)
 			return;
 
-		m_Core.TickDeferred();
+		if(GameServer()->m_CountDown < 0)
+			m_Core.TickDeferred();
 	}
 	else
 	{
@@ -799,6 +802,26 @@ void CCharacter::Tick()
 			Antibot()->OnHookAttach(m_pPlayer->GetCid(), true);
 		}
 	}
+
+	// if(m_Core.m_Drifting && Server()->Tick() % 3 == 0)
+	// {
+	// 	GameServer()->CreateSound(m_Pos, g_Config.m_SvSoundDrifting, CClientMask().set());
+	// }
+
+	// if(m_Core.m_Input.m_Jump && Server()->Tick() % 3 == 0)
+	// {
+	// 	GameServer()->CreateSound(m_Pos, g_Config.m_SvSoundGas, CClientMask().set());
+	// }
+
+	// if(m_Core.m_Input.m_Hook && m_Core.m_Speed > 0 && Server()->Tick() % 3 == 0)
+	// {
+	// 	GameServer()->CreateSound(m_Pos, g_Config.m_SvSoundBreaking, CClientMask().set());
+	// }
+
+	// if(m_Core.m_Input.m_Hook && m_Core.m_Speed < 0 && Server()->Tick() % 3 == 0)
+	// {
+	// 	GameServer()->CreateSound(m_Pos, g_Config.m_SvSoundReversing, CClientMask().set());
+	// }
 
 	// Previnput
 	m_PrevInput = m_Input;
@@ -1040,6 +1063,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCore = &m_SendCore;
 	}
 
+	Tick = 0;
+	pCore = &m_Core;
+
 	// change eyes and use ninja graphic if player is frozen
 	if(m_Core.m_DeepFrozen || m_FreezeTime > 0 || m_Core.m_LiveFrozen)
 	{
@@ -1109,11 +1135,21 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
+		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(Id);
+		if(!pPickup)
+			return;
+		
+		pPickup->m_X = m_Core.m_Pos.x + sin(m_Core.m_Angle)*5;
+		pPickup->m_Y = m_Core.m_Pos.y + cos(m_Core.m_Angle)*5;
+		
 		CNetObj_Character *pCharacter = Server()->SnapNewItem<CNetObj_Character>(Id);
 		if(!pCharacter)
 			return;
 
 		pCore->Write(pCharacter);
+
+		pCharacter->m_X = round_to_int(m_Core.m_Pos.x) - sin(m_Core.m_Angle)*32;
+		pCharacter->m_Y = round_to_int(m_Core.m_Pos.y) - cos(m_Core.m_Angle)*32;
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
@@ -1126,10 +1162,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		pCharacter->m_Weapon = Weapon;
+		pCharacter->m_Weapon = WEAPON_GUN;
 		pCharacter->m_AmmoCount = AmmoCount;
 		pCharacter->m_Health = Health;
-		pCharacter->m_Armor = Armor;
+		pCharacter->m_Armor = ceil((m_Core.m_Fuel*10) / (float)(g_Config.m_SvFuel * 32));
 		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 	}
 	else
@@ -1220,6 +1256,16 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCid();
 
+	// CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(Id+64);
+	// pPickup->m_Subtype = 0;
+	// pPickup->m_Type = 0;
+	// pPickup->m_X = m_Pos.x;
+	// pPickup->m_Y = m_Pos.y;
+
+	// m_pPlayer->m_ViewPos = m_Pos;
+
+	// return;
+
 	if(!Server()->Translate(Id, SnappingClient))
 		return;
 
@@ -1281,16 +1327,16 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
-	if(m_Core.m_LiveFrozen)
+	if(m_Core.m_LiveFrozen || true)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 
 	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
-	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
+	pDDNetCharacter->m_Jumps = 0; //m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
 
 	// Display Information
-	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacter->m_JumpedTotal = 0; //m_Core.m_JumpedTotal;
 	pDDNetCharacter->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
 	pDDNetCharacter->m_FreezeStart = m_Core.m_FreezeStart;
 	if(m_Core.m_IsInFreeze)
@@ -1309,8 +1355,8 @@ void CCharacter::Snap(int SnappingClient)
 	{
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TEAM0_MODE;
 	}
-	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
-	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+	pDDNetCharacter->m_TargetX = sin(m_Core.m_Angle)*5000; //m_Core.m_Input.m_TargetX;
+	pDDNetCharacter->m_TargetY = cos(m_Core.m_Angle)*5000; //m_Core.m_Input.m_TargetY;
 
 	// -1 is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
 	pDDNetCharacter->m_TuneZoneOverride = -1;

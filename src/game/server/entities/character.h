@@ -155,7 +155,6 @@ private:
 	int m_TriggeredEvents7;
 
 	// the player core for the physics
-	CCharacterCore m_Core;
 	CGameTeams *m_pTeams = nullptr;
 
 	// info for dead reckoning
@@ -185,6 +184,8 @@ private:
 	CSaveTee m_RescueTee[NUM_RESCUEMODES];
 
 public:
+	CCharacterCore m_Core;
+
 	CGameTeams *Teams() { return m_pTeams; }
 	void SetTeams(CGameTeams *pTeams);
 	bool TrySetRescue(int RescueMode);
@@ -211,6 +212,7 @@ public:
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
+	int m_StartTimeLap;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
 

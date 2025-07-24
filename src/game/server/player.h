@@ -65,6 +65,8 @@ public:
 	int m_TuneZone;
 	int m_TuneZoneOld;
 
+	int m_Laps;
+
 	// states if the client is chatting, accessing a menu etc.
 	int m_PlayerFlags;
 

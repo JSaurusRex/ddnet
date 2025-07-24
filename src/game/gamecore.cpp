@@ -183,9 +183,14 @@ void CCharacterCore::Reset()
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
 
+	m_Drifting = false;
+	m_Fuel = 32*g_Config.m_SvFuel;
+
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
+
+	m_Angle = pi/2;
 }
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
@@ -203,21 +208,28 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
 
+	m_Direction_Speed *= 0.9;
+
 	// handle input
 	if(UseInput)
 	{
-		m_Direction = m_Input.m_Direction;
+		m_Direction_Speed += std::clamp(m_Speed / 380.0, -0.4, 1.0) * m_Input.m_Direction * 0.05;			
+		
+		// m_Direction += m_Direction_Speed;
+
+		// if(
+		m_Angle -= std::clamp(m_Speed / 160.0, 0.0, 1.0) * m_Direction_Speed / (6+m_Speed/110);
 
 		// setup angle
-		float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
-		if(TmpAngle < -(pi / 2.0f))
-		{
-			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
-		}
-		else
-		{
-			m_Angle = (int)(TmpAngle * 256.0f);
-		}
+		// float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
+		// if(TmpAngle < -(pi / 2.0f))
+		// {
+		// 	m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
+		// }
+		// else
+		// {
+		// 	m_Angle = (int)(TmpAngle * 256.0f);
+		// }
 
 		// Special jump cases:
 		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
@@ -226,40 +238,91 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		// The second jumped bit can be overridden by special tiles so that the tee can nevertheless jump.
 
 		// handle jump
-		if(m_Input.m_Jump)
+		if(m_Input.m_Jump && (m_Fuel > 0 || m_Speed < 120) && !m_Input.m_Hook)
 		{
-			if(!(m_Jumped & 1))
-			{
-				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
-				{
-					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
-					if(m_Jumps > 1)
-					{
-						m_Jumped |= 1;
-					}
-					else
-					{
-						m_Jumped |= 3;
-					}
-					m_JumpedTotal = 0;
-				}
-				else if(!(m_Jumped & 2))
-				{
-					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
-					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
-					m_Jumped |= 3;
-					m_JumpedTotal++;
-				}
-			}
+			m_Speed += 4;
+			
+			if(m_Speed < 140)
+				m_Speed += 4;
+			
+			m_Fuel--;
+			// if(!(m_Jumped & 1))
+			// {
+			// 	if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
+			// 	{
+			// 		m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
+			// 		m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
+			// 		if(m_Jumps > 1)
+			// 		{
+			// 			m_Jumped |= 1;
+			// 		}
+			// 		else
+			// 		{
+			// 			m_Jumped |= 3;
+			// 		}
+			// 		m_JumpedTotal = 0;
+			// 	}
+			// 	else if(!(m_Jumped & 2))
+			// 	{
+			// 		m_TriggeredEvents |= COREEVENT_AIR_JUMP;
+			// 		m_Vel.y = -m_Tuning.m_AirJumpImpulse;
+			// 		m_Jumped |= 3;
+			// 		m_JumpedTotal++;
+			// 	}
+			// }
 		}
 		else
 		{
+			if(m_Speed > 0 && !m_Input.m_Hook)
+			{
+				m_Speed *= 0.999;
+				m_Speed -= 1;
+			}
 			m_Jumped &= ~1;
 		}
 
-		// handle hook
+		bool wasDrifting = m_Drifting;
+		m_Drifting = false;
+
 		if(m_Input.m_Hook)
+		{
+			if(!m_Input.m_Jump)
+			{
+				if(m_Speed > 0)
+					m_Speed *= 0.95;
+
+				m_Speed -= 6;
+			}else
+			{
+				m_Drifting = true;
+			}
+
+			m_Angle -= 0.8 * m_Direction_Speed / (8+m_Speed/(50));
+		}else if(m_Speed < 0)
+		{
+			m_Speed *= 0.99;
+		}
+
+		vec2 speedVec = vec2(sin(m_Angle), cos(m_Angle))*m_Speed/50;
+
+		//slow down after drift if directions dont align
+		if(wasDrifting && !m_Drifting)
+		{
+			m_Speed /= 1 + distance(speedVec, m_Vel)/(1+length(m_Vel));
+		}
+
+		speedVec = vec2(sin(m_Angle), cos(m_Angle))*m_Speed;
+		
+		
+		if(m_Speed > 0)
+			m_Speed = length(ClampVel(m_MoveRestrictions, speedVec));
+		else
+			m_Speed = -length(ClampVel(m_MoveRestrictions, speedVec));
+		
+		m_Jumped = 0;
+
+		// handle hook
+		if(m_Input.m_Hook && false)
 		{
 			if(m_HookState == HOOK_IDLE)
 			{
@@ -279,6 +342,13 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 	}
 
+	if(m_Speed < -240)
+		m_Speed = -240;
+	if(m_Speed > 50*24)
+		m_Speed = 50*24;
+
+	m_Speed /= (1+pow(m_Direction_Speed*0.12f, 2));
+
 	// handle jumping
 	// 1 bit = to keep track if a jump has been made on this input (player is holding space bar)
 	// 2 bit = to track if all air-jumps have been used up (tee gets dark feet)
@@ -289,12 +359,19 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	}
 
 	// add the speed modification according to players wanted direction
-	if(m_Direction < 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
-	if(m_Direction > 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
-	if(m_Direction == 0)
-		m_Vel.x *= Friction;
+	// if(m_Direction < 0)
+	// 	m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
+	// if(m_Direction > 0)
+	// 	m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
+	// if(m_Direction == 0)
+	// 	m_Vel.x *= Friction;
+
+	float amount = 5;
+
+	if(m_Input.m_Hook && m_Input.m_Jump)
+		amount += 7;
+
+	m_Vel = (m_Vel*amount + vec2(sin(m_Angle)*m_Speed, cos(m_Angle)*m_Speed) / 50.0) / (amount+1);
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)
@@ -435,12 +512,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			else
 				HookVel.x *= 0.75f;
 
-			vec2 NewVel = m_Vel + HookVel;
+			// vec2 NewVel = m_Vel + HookVel;
 
-			// check if we are under the legal limit for the hook
-			const float NewVelLength = length(NewVel);
-			if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
-				m_Vel = NewVel; // no problem. apply
+			// // check if we are under the legal limit for the hook
+			// const float NewVelLength = length(NewVel);
+			// if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
+			// 	m_Vel = NewVel; // no problem. apply
 		}
 
 		// release hook (max default hook time is 1.25 s)
@@ -559,6 +636,8 @@ void CCharacterCore::Move()
 	}
 	else
 		m_LeftWall = true;
+	
+	m_Speed /= 1+distance(m_Vel, OldVel)/4.0;
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
@@ -633,7 +712,7 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	SetHookedPlayer(pObjCore->m_HookedPlayer);
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;
-	m_Angle = pObjCore->m_Angle;
+	// m_Angle = pObjCore->m_Angle;
 }
 
 void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)

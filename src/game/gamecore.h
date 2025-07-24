@@ -184,6 +184,8 @@ public:
 	vec2 m_Pos;
 	vec2 m_Vel;
 
+	bool m_Drifting;
+
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
@@ -213,13 +215,17 @@ public:
 
 	bool m_NewHook;
 
+	int m_Fuel;
+
 	int m_Jumped;
 	// m_JumpedTotal counts the jumps performed in the air
 	int m_JumpedTotal;
 	int m_Jumps;
 
 	int m_Direction;
-	int m_Angle;
+	float m_Direction_Speed;
+	float m_Angle;
+	int m_Speed;
 	CNetObj_PlayerInput m_Input;
 
 	int m_TriggeredEvents;

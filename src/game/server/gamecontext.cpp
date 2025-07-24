@@ -1035,6 +1035,20 @@ void CGameContext::OnTick()
 	// check tuning
 	CheckPureTuning();
 
+	if(m_CountDown >= 0 && Server()->Tick() % Server()->TickSpeed() == 0)
+	{
+
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%i", m_CountDown);
+		if(m_CountDown == 0)
+			str_copy(aBuf, "go", sizeof(aBuf));
+		
+		SendChat(-1, TEAM_ALL, aBuf);
+		SendBroadcast(aBuf, -1, true);
+
+		m_CountDown--;
+	}
+
 	if(m_TeeHistorianActive)
 	{
 		int Error = aio_error(m_pTeeHistorianFile);
@@ -3168,6 +3182,33 @@ void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_World.m_Paused ^= 1;
 }
 
+void CGameContext::ConStart(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->m_apPlayers[i] || pSelf->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || !pSelf->m_apPlayers[i]->GetCharacter())
+			continue;
+		
+		pSelf->m_apPlayers[i]->KillCharacter();
+	}
+
+	pSelf->m_CountDown = pResult->GetInteger(0);
+	pSelf->m_Spots = 0;
+
+	for(int i = 0; i < 100; i++)
+		pSelf->m_aSpots[i] = 0;
+	
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->PlayerExists(i))
+			continue;
+		
+		pSelf->m_apPlayers[i]->m_Laps = 0;
+	}
+}
+
 void CGameContext::ConChangeMap(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -3718,6 +3759,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_SERVER | CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 	Console()->Register("switch_open", "i[switch]", CFGFLAG_SERVER | CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is deactivated by default (otherwise activated)");
 	Console()->Register("pause_game", "", CFGFLAG_SERVER, ConPause, this, "Pause/unpause game");
+	Console()->Register("start", "i[seconds]", CFGFLAG_SERVER, ConStart, this, "Starts the game in X seconds");
 	Console()->Register("change_map", "r[map]", CFGFLAG_SERVER | CFGFLAG_STORE, ConChangeMap, this, "Change map");
 	Console()->Register("random_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomMap, this, "Random map");
 	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");

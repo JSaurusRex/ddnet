@@ -25,6 +25,10 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_pGameServer = pGameServer;
 	m_ClientId = ClientId;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
+
+	if(!g_Config.m_SvAllowSpec)
+		m_Team = TEAM_SPECTATORS;
+	
 	m_NumInputs = 0;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientId);
@@ -51,6 +55,8 @@ void CPlayer::Reset()
 	m_LastSetTeam = 0;
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
+
+	m_Laps = 0;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);
 	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)
@@ -363,7 +369,11 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Score = Score;
 		pPlayerInfo->m_Local = (int)(m_ClientId == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
 		pPlayerInfo->m_ClientId = id;
-		pPlayerInfo->m_Team = m_Team;
+		pPlayerInfo->m_Team = TEAM_SPECTATORS;
+
+		if(m_ClientId != SnappingClient)
+			pPlayerInfo->m_Team = m_Team;
+
 		if(SnappingClientVersion < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
 		{
 			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
@@ -385,6 +395,33 @@ void CPlayer::Snap(int SnappingClient)
 		// Times are in milliseconds for 0.7
 		pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000 : -1;
 		pPlayerInfo->m_Latency = Latency;
+	}
+
+	if(SnappingClient == m_ClientId && m_Team != TEAM_SPECTATORS)
+	{
+		CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(id);
+		if(!pSpectatorInfo)
+			return;
+
+		pSpectatorInfo->m_SpectatorId = m_ClientId;
+		pSpectatorInfo->m_X = m_ViewPos.x;
+		pSpectatorInfo->m_Y = m_ViewPos.y;
+
+		if(GetCharacter())
+		{
+			pSpectatorInfo->m_X = m_pCharacter->m_Pos.x + m_pCharacter->GetCore().m_Vel.x*6;
+			pSpectatorInfo->m_Y = m_pCharacter->m_Pos.y + m_pCharacter->GetCore().m_Vel.y*6;
+		}
+
+		CNetObj_DDNetSpectatorInfo *pDDNetSpectatorInfo = Server()->SnapNewItem<CNetObj_DDNetSpectatorInfo>(id);
+		if(!pDDNetSpectatorInfo)
+			return;
+
+		pDDNetSpectatorInfo->m_HasCameraInfo = 1;
+		pDDNetSpectatorInfo->m_Zoom = 5 * 1000.0f;
+		pDDNetSpectatorInfo->m_Deadzone = 400;
+		pDDNetSpectatorInfo->m_FollowFactor = 100;
+
 	}
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -412,7 +449,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
-	if(m_ClientId == SnappingClient)
+	if(m_ClientId == SnappingClient && m_Team == TEAM_SPECTATORS)
 	{
 		// send extended spectator info even when playing, this allows demo to record camera settings for local player
 		const int SpectatingClient = ((m_Team != TEAM_SPECTATORS && !m_Paused) || m_SpectatorId < 0 || m_SpectatorId >= MAX_CLIENTS) ? id : m_SpectatorId;

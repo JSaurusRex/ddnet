@@ -347,7 +347,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 			if(m_aPractice[Team])
 			{
-				ChangeTeamState(Team, ETeamState::FINISHED);
+				ChangeTeamState(Team, ETeamState::OPEN);
 
 				int min = (int)Time / 60;
 				float sec = Time - (min * 60.0f);
@@ -360,7 +360,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
 				{
-					SetDDRaceState(apTeamPlayers[i], ERaceState::FINISHED);
+					SetDDRaceState(apTeamPlayers[i], ERaceState::NONE);
 				}
 
 				return;
@@ -370,8 +370,47 @@ void CGameTeams::CheckTeamFinished(int Team)
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
 			for(unsigned int i = 0; i < PlayersCount; ++i)
-				OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
-			ChangeTeamState(Team, ETeamState::FINISHED); // TODO: Make it better
+			{
+				if(!apTeamPlayers[i])
+					continue;
+				
+				apTeamPlayers[i]->m_Laps++;
+				
+
+				SetDDRaceState(apTeamPlayers[i], ERaceState::NONE);
+				if(apTeamPlayers[i]->m_Laps >= g_Config.m_SvLaps)
+				{
+					OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
+					GameServer()->SendBroadcast("Finish!", apTeamPlayers[i]->GetCid(), true);
+					apTeamPlayers[i]->KillCharacter();
+					apTeamPlayers[i]->m_Laps = 0;
+				}
+				else
+				{
+					char aText[256];
+					str_format(aText, 256, "%i/%i", apTeamPlayers[i]->m_Laps+1, g_Config.m_SvLaps);
+					GameServer()->SendBroadcast(aText, apTeamPlayers[i]->GetCid(), true);
+
+					int TimeTicks2 = Server()->Tick() - apTeamPlayers[i]->GetCharacter()->m_StartTimeLap;
+					Time = (float)TimeTicks2 / (float)Server()->TickSpeed();
+					if(TimeTicks2 > 0)
+					{
+						int min = (int)Time / 60;
+						float sec = Time - (min * 60.0f);
+
+						str_format(aText, sizeof(aText),
+							"lap %i in: %d:%5.2f", apTeamPlayers[i]->m_Laps, min, sec);
+						
+						GameServer()->SendChatTarget(apTeamPlayers[i]->GetCid(), aText);
+					}
+
+					GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]++;
+					str_format(aText, sizeof(aText),
+							"you are in %i place", GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]);
+					GameServer()->SendChatTarget(apTeamPlayers[i]->GetCid(), aText);
+				}
+			}
+			ChangeTeamState(Team, ETeamState::OPEN); // TODO: Make it better
 			OnTeamFinish(Team, apTeamPlayers, PlayersCount, TimeTicks, aTimestamp);
 		}
 	}
@@ -652,7 +691,11 @@ void CGameTeams::SetStartTime(CPlayer *Player, int StartTime)
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
-		pChar->m_StartTime = StartTime;
+	{
+		if(Player->m_Laps == 0)
+			pChar->m_StartTime = StartTime;
+		pChar->m_StartTimeLap = StartTime;
+	}
 }
 
 void CGameTeams::SetLastTimeCp(CPlayer *Player, int LastTimeCp)
@@ -711,10 +754,12 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 
 	char aBuf[128];
 	SetLastTimeCp(Player, -1);
+
+	GameServer()->m_Spots++;
 	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
-		"%s finished in: %d minute(s) %5.2f second(s)",
-		Server()->ClientName(ClientId), (int)Time / 60,
+		"%s finished in %i place with: %d minute(s) %5.2f second(s)",
+		Server()->ClientName(ClientId), GameServer()->m_Spots, (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
 	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
@@ -799,7 +844,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		}
 	}
 
-	SetDDRaceState(Player, ERaceState::FINISHED);
+	SetDDRaceState(Player, ERaceState::NONE);
 	if(NeedToSendNewServerRecord)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)

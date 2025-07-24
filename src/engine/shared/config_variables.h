@@ -593,6 +593,16 @@ MACRO_CONFIG_INT(SvRejoinTeam0, sv_rejoin_team_0, 1, 0, 1, CFGFLAG_SERVER, "Make
 
 MACRO_CONFIG_INT(SvNoWeakHook, sv_no_weak_hook, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to use an alternative calculation for world ticks, that makes the hook behave like all players have strong.")
 
+MACRO_CONFIG_INT(SvAllowSpec, sv_allow_spec, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Allow entering spectators.")
+
+MACRO_CONFIG_INT(SvFuel, sv_fuel, 100, 1, 1000000, CFGFLAG_SERVER | CFGFLAG_GAME, "Fuel amount.")
+MACRO_CONFIG_INT(SvLaps, sv_laps, 3, 1, 50, CFGFLAG_SERVER | CFGFLAG_GAME, "Lap count.")
+
+// MACRO_CONFIG_INT(SvSoundDrifting, sv_sound_drifting, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound drifting")
+// MACRO_CONFIG_INT(SvSoundBreaking, sv_sound_breaking, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound braking")
+// MACRO_CONFIG_INT(SvSoundReversing, sv_sound_reversing, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound reversing")
+// MACRO_CONFIG_INT(SvSoundGas, sv_sound_gas, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound gas")
+
 MACRO_CONFIG_INT(ClReconnectTimeout, cl_reconnect_timeout, 120, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (after timeout, 0 for off)")
 MACRO_CONFIG_INT(ClReconnectFull, cl_reconnect_full, 5, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many seconds to wait before reconnecting (when server is full, 0 for off)")
 

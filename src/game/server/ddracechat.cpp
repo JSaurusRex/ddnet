@@ -359,22 +359,19 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 {
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
+	
+	if(!g_Config.m_SvAllowSpec)
+		return;
 
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return;
 
-	int PauseType = g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED;
-
-	if(pPlayer->GetCharacter())
-	{
-		CGameTeams &Teams = pSelf->m_pController->Teams();
-		if(Teams.IsPractice(Teams.m_Core.Team(pResult->m_ClientId)))
-			PauseType = CPlayer::PAUSE_SPEC;
-	}
-
-	ToggleSpecPause(pResult, pUserData, PauseType);
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		pPlayer->SetTeam(TEAM_RED);
+	else
+		pPlayer->SetTeam(TEAM_SPECTATORS);
 }
 
 void CGameContext::ConToggleSpecVoted(IConsole::IResult *pResult, void *pUserData)

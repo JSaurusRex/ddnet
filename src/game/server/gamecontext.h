@@ -140,6 +140,7 @@ class CGameContext : public IGameServer
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult *pResult, void *pUserData);
 	static void ConPause(IConsole::IResult *pResult, void *pUserData);
+	static void ConStart(IConsole::IResult *pResult, void *pUserData);
 	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
@@ -201,6 +202,10 @@ public:
 	~CGameContext();
 
 	void Clear();
+
+	int m_CountDown = 0;
+	int m_Spots = 0;
+	int m_aSpots[100] = {0};
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];

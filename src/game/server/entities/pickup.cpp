@@ -10,6 +10,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
+#include <engine/shared/config.h>
+
 static constexpr int gs_PickupPhysSize = 14;
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number, int Flags) :
@@ -58,25 +60,10 @@ void CPickup::Tick()
 			case POWERUP_ARMOR:
 				if(pChr->Team() == TEAM_SUPER)
 					continue;
-				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
-				{
-					if(pChr->GetWeaponGot(j))
-					{
-						pChr->SetWeaponGot(j, false);
-						pChr->SetWeaponAmmo(j, 0);
-						Sound = true;
-					}
-				}
-				pChr->SetNinjaActivationDir(vec2(0, 0));
-				pChr->SetNinjaActivationTick(-500);
-				pChr->SetNinjaCurrentMoveTime(0);
-				if(Sound)
-				{
-					pChr->SetLastWeapon(WEAPON_GUN);
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
-				}
-				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
-					pChr->SetActiveWeapon(WEAPON_HAMMER);
+				pChr->m_Core.m_Fuel = g_Config.m_SvFuel*32;
+				
+				if(pChr->m_Core.m_Speed > 40)
+					pChr->m_Core.m_Speed = 40;
 				break;
 
 			case POWERUP_ARMOR_SHOTGUN:
