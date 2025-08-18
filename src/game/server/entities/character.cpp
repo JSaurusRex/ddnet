@@ -126,6 +126,9 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		}
 	}
 
+	if(m_pPlayer)
+		m_pPlayer->m_Laps = 0;
+
 	return true;
 }
 
