@@ -407,7 +407,7 @@ void CPlayer::Snap(int SnappingClient)
 		pSpectatorInfo->m_X = m_ViewPos.x;
 		pSpectatorInfo->m_Y = m_ViewPos.y;
 
-		if(GetCharacter())
+		if(GetCharacter() && g_Config.m_SvFancyCamera)
 		{
 			pSpectatorInfo->m_X = m_pCharacter->m_Pos.x + m_pCharacter->GetCore().m_Vel.x*6;
 			pSpectatorInfo->m_Y = m_pCharacter->m_Pos.y + m_pCharacter->GetCore().m_Vel.y*6;

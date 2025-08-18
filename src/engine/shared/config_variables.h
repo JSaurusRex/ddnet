@@ -598,6 +598,7 @@ MACRO_CONFIG_INT(SvAllowSpec, sv_allow_spec, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_G
 MACRO_CONFIG_INT(SvFuel, sv_fuel, 100, 1, 1000000, CFGFLAG_SERVER | CFGFLAG_GAME, "Fuel amount.")
 MACRO_CONFIG_INT(SvLaps, sv_laps, 3, 1, 50, CFGFLAG_SERVER | CFGFLAG_GAME, "Lap count.")
 MACRO_CONFIG_INT(SvSpectatorOnFinish, sv_spectator_on_finish, 0, 1, 0, CFGFLAG_SERVER | CFGFLAG_GAME, "When a tee finishes they'll be moved to spectators.")
+MACRO_CONFIG_INT(SvFancyCamera, sv_fancy_camera, 0, 1, 0, CFGFLAG_SERVER | CFGFLAG_GAME, "Fancy camera that looks ahead.")
 
 // MACRO_CONFIG_INT(SvSoundDrifting, sv_sound_drifting, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound drifting")
 // MACRO_CONFIG_INT(SvSoundBreaking, sv_sound_breaking, 0, 0, 42, CFGFLAG_SERVER | CFGFLAG_GAME, "Sound braking")
