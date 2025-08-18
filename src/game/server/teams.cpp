@@ -385,7 +385,11 @@ void CGameTeams::CheckTeamFinished(int Team)
 					apTeamPlayers[i]->KillCharacter();
 					
 					if(g_Config.m_SvSpectatorOnFinish)
+					{
 						apTeamPlayers[i]->SetTeam(TEAM_SPECTATORS);
+						if(Server()->ClientIngame(apTeamPlayers[i]->GetCid()))
+							printf("[SITE]: %s finished in %i place\n", Server()->ClientName(apTeamPlayers[i]->GetCid()), GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]);
+					}
 					apTeamPlayers[i]->m_Laps = 0;
 				}
 				else
@@ -412,7 +416,16 @@ void CGameTeams::CheckTeamFinished(int Team)
 							"you are in %i place", GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]);
 
 					if(g_Config.m_SvSpectatorOnFinish)
+					{
 						GameServer()->SendChatTarget(apTeamPlayers[i]->GetCid(), aText);
+
+						if(Server()->ClientIngame(apTeamPlayers[i]->GetCid()))
+						{
+							printf("[SITE]: %s is in %i place\n", Server()->ClientName(apTeamPlayers[i]->GetCid()), GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]);
+							printf("[SITE]: %s is on %i lap\n", Server()->ClientName(apTeamPlayers[i]->GetCid()), apTeamPlayers[i]->m_Laps);
+							printf("[SITE]: %s lap in %i ticks\n", Server()->ClientName(apTeamPlayers[i]->GetCid()), TimeTicks2);
+						}
+					}
 				}
 			}
 			ChangeTeamState(Team, ETeamState::OPEN); // TODO: Make it better
