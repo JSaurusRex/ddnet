@@ -376,13 +376,16 @@ void CGameTeams::CheckTeamFinished(int Team)
 				
 				apTeamPlayers[i]->m_Laps++;
 				
-
 				SetDDRaceState(apTeamPlayers[i], ERaceState::NONE);
+
 				if(apTeamPlayers[i]->m_Laps >= g_Config.m_SvLaps)
 				{
 					OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
 					GameServer()->SendBroadcast("Finish!", apTeamPlayers[i]->GetCid(), true);
 					apTeamPlayers[i]->KillCharacter();
+					
+					if(g_Config.m_SvSpectatorOnFinish)
+						apTeamPlayers[i]->SetTeam(TEAM_SPECTATORS);
 					apTeamPlayers[i]->m_Laps = 0;
 				}
 				else
@@ -407,7 +410,9 @@ void CGameTeams::CheckTeamFinished(int Team)
 					GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]++;
 					str_format(aText, sizeof(aText),
 							"you are in %i place", GameServer()->m_aSpots[apTeamPlayers[i]->m_Laps]);
-					GameServer()->SendChatTarget(apTeamPlayers[i]->GetCid(), aText);
+
+					if(g_Config.m_SvSpectatorOnFinish)
+						GameServer()->SendChatTarget(apTeamPlayers[i]->GetCid(), aText);
 				}
 			}
 			ChangeTeamState(Team, ETeamState::OPEN); // TODO: Make it better
