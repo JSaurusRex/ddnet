@@ -370,8 +370,11 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 	if(m_Input.m_Hook && m_Input.m_Jump)
 		amount += 7;
+	
+	m_Friction = (m_Friction * 7 + amount) / 8;
+	printf("friction %f\n", m_Friction);
 
-	m_Vel = (m_Vel*amount + vec2(sin(m_Angle)*m_Speed, cos(m_Angle)*m_Speed) / 50.0) / (amount+1);
+	m_Vel = (m_Vel*m_Friction + vec2(sin(m_Angle)*m_Speed, cos(m_Angle)*m_Speed) / 50.0) / (m_Friction+1);
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)

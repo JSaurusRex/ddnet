@@ -226,6 +226,7 @@ public:
 	float m_Direction_Speed;
 	float m_Angle;
 	int m_Speed;
+	float m_Friction;
 	CNetObj_PlayerInput m_Input;
 
 	int m_TriggeredEvents;
