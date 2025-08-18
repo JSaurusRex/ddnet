@@ -773,7 +773,8 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	char aBuf[128];
 	SetLastTimeCp(Player, -1);
 
-	GameServer()->m_Spots++;
+	if(g_Config.m_SvSpectatorOnFinish)
+		GameServer()->m_Spots++;
 	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
 		"%s finished in %i place with: %d minute(s) %5.2f second(s)",

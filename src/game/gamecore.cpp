@@ -372,7 +372,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		amount += 7;
 	
 	m_Friction = (m_Friction * 7 + amount) / 8;
-	printf("friction %f\n", m_Friction);
 
 	m_Vel = (m_Vel*m_Friction + vec2(sin(m_Angle)*m_Speed, cos(m_Angle)*m_Speed) / 50.0) / (m_Friction+1);
 
