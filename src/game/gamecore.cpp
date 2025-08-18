@@ -297,7 +297,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_Drifting = true;
 			}
 
-			m_Angle -= 0.8 * m_Direction_Speed / (8+m_Speed/(50));
+			m_Angle -= 0.6 * m_Direction_Speed / (8+m_Speed/(50));
 		}else if(m_Speed < 0)
 		{
 			m_Speed *= 0.99;
@@ -308,7 +308,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		//slow down after drift if directions dont align
 		if(wasDrifting && !m_Drifting)
 		{
-			m_Speed /= 1 + distance(speedVec, m_Vel)/(1+length(m_Vel));
+			m_Speed /= 1 + (distance(speedVec, m_Vel)/(1+length(m_Vel))) * 0.7;
 		}
 
 		speedVec = vec2(sin(m_Angle), cos(m_Angle))*m_Speed;
